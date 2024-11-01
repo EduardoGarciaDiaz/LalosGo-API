@@ -1,0 +1,28 @@
+{
+  "name": "lalosgo_api",
+  "version": "1.0.0",
+  "description": "LalosGo API REST",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EduardoGarciaDiaz/LalosGo-Server.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/EduardoGarciaDiaz/LalosGo-Server/issues"
+  },
+  "homepage": "https://github.com/EduardoGarciaDiaz/LalosGo-Server#readme",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}
