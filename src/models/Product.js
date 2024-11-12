@@ -4,7 +4,9 @@ const model = mongoose.model
 productSchema = new mongoose.Schema({
     barCode: {
         type: String,
-        required: true
+        required: true,
+        unique: true,
+        index: true
     },
     name: {
         type: String,
@@ -30,11 +32,13 @@ productSchema = new mongoose.Schema({
         required: true
     },
     productStatus: {
-        type: String,// O referencia a otro modelo?
+        type: String,
+        enum:['Active', 'Inactive'],
         required: true 
     },
     unitMeasure: {
         type: String,
+        enum:['KG', 'Lts', 'Units'],
         required: true
     },
     category: {

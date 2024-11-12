@@ -13,10 +13,9 @@ orderSchema = new mongoose.Schema({
     },
     deliveryDate: {
         type: Date,
-        required: true,
     },
     totalPrice: {
-        type: String,
+        type: Number,
         required: true,
     },
     branch: {
@@ -41,10 +40,11 @@ orderSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'users',
     },
-    status: {
+    statusOrder: {
         type: String,
+        enum: ['pending', 'in process', 'on delivery', 'delivered'], //REVISAR LOS ESTADOS DE UNA ORDEN, SI SON ESTOS????
         required: true,
-        default: 'pending'
+        default: 'pending' 
     },
     paymentMethod: {
         type: String,
@@ -56,4 +56,4 @@ orderSchema = new mongoose.Schema({
     versionKey: false
 })
 
-module.exports = model("orders", branchSchema)
+module.exports = model("orders", orderSchema)

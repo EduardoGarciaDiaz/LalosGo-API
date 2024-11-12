@@ -9,19 +9,20 @@ incidentSchema = new mongoose.Schema({
     photo: {
         type: Buffer,
         required: true
+    },    
+    date: {
+        type: Date,
+        required: true,
     },
     orderNumber: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'orders',
-    },
-    date: {
-        type: Date,
-        required: true,
     }
+
 },
 {
     timeseries: true,
     versionKey: false
 })
 
-module.exports = model("incidents", branchSchema)
+module.exports = model("incidents", incidentSchema)
