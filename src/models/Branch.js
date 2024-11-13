@@ -15,7 +15,7 @@ branchSchema = new mongoose.Schema({
         type: String, //#Formato 24:00
         required: true,
     },
-    aaddress: {
+    address: {
         street: {
             type: String,
             required: true

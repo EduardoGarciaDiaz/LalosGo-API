@@ -1,7 +1,6 @@
 const mongoose = require('mongoose')
 const model = mongoose.model
 
-
 const clientSchema = new mongoose.Schema({
     addresses: [{
         street: {
@@ -75,10 +74,10 @@ const clientSchema = new mongoose.Schema({
     }]    
 })
 
-const employeeShema = new mongoose.Schema({
+const employeeSchema = new mongoose.Schema({
     role: {
         type: String,
-        enum:['Manager', 'Delivery' ],//CUALES MAS?????
+        enum:['Manager', 'Delivery' ], //CUALES MAS?????
         required: true
     },
     hiredDate:{
@@ -121,7 +120,7 @@ userSchema = new mongoose.Schema({
         required: false
     },
     employee: {
-        type: employeeShema,
+        type: employeeSchema,
         required: false
     }    
 },

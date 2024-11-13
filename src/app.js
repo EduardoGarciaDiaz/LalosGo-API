@@ -1,4 +1,4 @@
-const Express = require('express');
-const App = Express();
+const express = require('express');
+const app = express();
 
-module.exports = App;
+module.exports = app;

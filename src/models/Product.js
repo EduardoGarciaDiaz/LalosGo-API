@@ -5,7 +5,6 @@ productSchema = new mongoose.Schema({
     barCode: {
         type: String,
         required: true,
-        unique: true,
         index: true
     },
     name: {
@@ -38,7 +37,7 @@ productSchema = new mongoose.Schema({
     },
     unitMeasure: {
         type: String,
-        enum:['KG', 'Lts', 'Units'],
+        enum:['Kgs', 'Lts', 'Units'],
         required: true
     },
     category: {
