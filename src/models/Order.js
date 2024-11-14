@@ -40,11 +40,15 @@ orderSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'users',
     },
+    deliveryPerson:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users',
+    },
     statusOrder: {
         type: String,
-        enum: ['pending', 'in process', 'on delivery', 'delivered'], //REVISAR LOS ESTADOS DE UNA ORDEN, SI SON ESTOS????
+        enum: ['reserved', 'pending', 'approved', 'in transit', 'delivered', 'not delivered', 'canceled'],
         required: true,
-        default: 'pending' 
+        default: 'reserved' 
     },
     paymentMethod: {
         type: String,

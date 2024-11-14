@@ -37,7 +37,7 @@ productSchema = new mongoose.Schema({
     },
     unitMeasure: {
         type: String,
-        enum:['Kgs', 'Lts', 'Units'],
+        enum:['Piece', 'Kilogram', 'Gram', 'Liter', 'Milliliter', 'Meter', 'Centimeter', 'Inch', 'Pack', 'Box'],
         required: true
     },
     category: {
