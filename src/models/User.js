@@ -51,7 +51,7 @@ const clientSchema = new mongoose.Schema({
             required: true
         },
         cardNumber: {
-            type: Number,
+            type: String,
             required: true
         },
         cardEmitter: {
@@ -125,7 +125,7 @@ userSchema = new mongoose.Schema({
     }    
 },
 {
-    timeseries: true,
+    timestamps: true,
     versionKey: false
 })
 

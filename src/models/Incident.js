@@ -21,7 +21,7 @@ incidentSchema = new mongoose.Schema({
 
 },
 {
-    timeseries: true,
+    timestamps: true,
     versionKey: false
 })
 
