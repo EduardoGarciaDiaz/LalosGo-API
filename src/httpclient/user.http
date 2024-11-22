@@ -1,0 +1,11 @@
+POST http://localhost:3000/api/v1/user
+Content-Type: application/json
+
+{
+  "email": "daniarcos319@gmail.com",
+  "fullName": "Daniel Garcia Arcos",
+  "birthDate": "2003-12-28",
+  "phoneNumber": "1323020010",
+  "password": "Asfixiars3#",
+  "roles": ["Guest", "Host"]
+}

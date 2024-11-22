@@ -1,9 +1,12 @@
 const express = require('express');
-const router = express.router();
-const ProductRoutes = require('./product.routes');
 const CategoryRoutes = require('./category.routes')
-
-router.use('/products', ProductRoutes);
+const UserRoutes = require('./user.routes');
+const router = express.Router();
 router.use('/categories', CategoryRoutes)
+router.use("/users", UserRoutes);
 
-express.router();
+
+
+router.use('*', (req, res) => { res.status(404).send()})
+
+module.exports = router;
