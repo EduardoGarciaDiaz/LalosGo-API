@@ -63,18 +63,28 @@ const clientSchema = new mongoose.Schema({
             required: true,
         },
         cvv: {
-            type: Number,
+            type: String,
             required: true,
         },
         cardType: {
             type: String,
-            enum: ['Debit', 'Credit'],
+            enum: ['Débito', 'Crédito'],
+            required: true
+        },
+        paymentNetwork: {
+            type: String,
+            enum: ['Visa', 'MasterCard'],
             required: true
         }
     }]    
 })
 
 const employeeSchema = new mongoose.Schema({
+    username: {
+        type: String,
+        required: true,
+        unique: true
+    },
     role: {
         type: String,
         enum:['Manager', 'Delivery Person', 'Sales Executive' ],
@@ -83,6 +93,11 @@ const employeeSchema = new mongoose.Schema({
     hiredDate:{
         type : Date,
         required: true,
+    },
+    branch: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'branches',
+        required: true
     }
 })
 
