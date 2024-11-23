@@ -22,7 +22,7 @@ orderSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'branches',
     },
-    products: [{
+    orderProducts: [{
         product: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'products',

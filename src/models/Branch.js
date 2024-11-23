@@ -60,9 +60,15 @@ branchSchema = new mongoose.Schema({
             }
         }       
     },
-    products: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'products',
+    branchProducts: [{
+        product: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'products',
+        },
+        quantity: {
+            type: Number,
+            required: true
+        }
     }],
 },
 {
