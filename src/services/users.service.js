@@ -11,10 +11,10 @@ const postPaymentMethod = async (userId, newPaymentMethod) => {
             
             //TODO: Validar que la tarjeta no esté registrada a el usuario
             if (existingCard && existingCard._id.toString() == userId) {
-                console.log('La tarjeta ya está registrada.');
+                console.log('El método de pago ya está registrado.');
                 throw {
                     status: 400,
-                    message: "La tarjeta ya está registrada."
+                    message: "El método de pago ya está registrado."
                 };
             }
 
@@ -39,7 +39,6 @@ const postPaymentMethod = async (userId, newPaymentMethod) => {
             await userFound.save();
 
             const addedPaymentMethod = userFound.client.paymentMethods[userFound.client.paymentMethods.length - 1];
-            console.log("Método de pago agregado:", addedPaymentMethod);
             return addedPaymentMethod; 
         }
     } catch (error) {
@@ -124,8 +123,50 @@ const deletePaymentMethod = async (userId, paymentMethodId) => {
     }   
 }
 
+const updatePaymentMethod = async (userId, paymentMethodId, updatedPaymentMethod) => {
+    try {
+        const userFound = await User.findById(userId);
+
+        if (!userFound) {
+            throw {
+                status: 404,
+                message: "Usuario no encontrado"
+            };
+        }
+
+        if (!userFound.client || !userFound.client.paymentMethods) {
+            throw {
+                status: 400,
+                message: "El usuario no tiene métodos de pago configurados"
+            };
+        }
+
+        const paymentMethodFound = userFound.client.paymentMethods.id(paymentMethodId);
+        if (!paymentMethodFound) {
+            throw {
+                status: 404,
+                message: "Método de pago no encontrado"
+            };
+        }
+
+        paymentMethodFound.set(updatedPaymentMethod);
+        await userFound.save();
+
+        return paymentMethodFound;
+    } catch (error) {
+        if (error.status) {
+            throw {
+                status: error.status,
+                message: error.message
+            }
+        }
+        throw error;
+    }
+}
+
 module.exports = { 
     postPaymentMethod,
     getPaymentMethods,
-    deletePaymentMethod
+    deletePaymentMethod,
+    updatePaymentMethod
 }

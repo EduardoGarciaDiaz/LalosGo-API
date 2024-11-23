@@ -25,7 +25,7 @@ const postPaymentMethod = async (req, res, next) => {
         const result = await UserService.postPaymentMethod(userId, newPaymentMethod);
 
         return res.status(201).send({
-            message: "Tarjeta registrada correctamente",
+            message: "Método de pago registrado correctamente",
             newPaymentMethod: result
         });
     } catch (error) {
@@ -76,9 +76,50 @@ const deletePaymentMethod = async (req, res, next) => {
         const result = await UserService.deletePaymentMethod(userId, paymentMethodId);
 
         return res.status(200).send({
-            message: "Métodod de pago eliminado correctamente",
+            message: "Método de pago eliminado correctamente",
             data: result
         });
+    } catch (error) {
+        if (error.status) {
+            return res
+                .status(error.status)
+                .send({message: error.message});
+        }
+        next(error)
+    }
+}
+
+const updatePaymentMethod = async (req, res, next) => { 
+    try {
+        const userId = req.params.userId;
+        if (!userId || userId === null || userId === '') {
+            return res.status(400).send({error: `El id del usuario '${userId}' viene nulo o vacío`})
+        }
+
+        const paymentMethodId = req.params.paymentMethodId;
+        if (!paymentMethodId || paymentMethodId === null || paymentMethodId === '') {
+            return res.status(400).send({error: `El id del método de pago '${paymentMethodId}' viene nulo o vacío`})
+        }
+
+        const { cardOwner, cardNumber, cardEmitter, expirationDate, cvv, cardType, paymentNetwork } = req.body;
+
+        const updatedPaymentMethod = {
+            cardOwner,
+            cardNumber,
+            cardEmitter,
+            expirationDate,
+            cvv,
+            cardType,
+            paymentNetwork
+        }
+
+        const result = await UserService.updatePaymentMethod(userId, paymentMethodId, updatedPaymentMethod);
+
+        return res.status(200).send({
+            message: "Método de pago actualizado",
+            updatedPaymentMethod: result
+        });
+
     } catch (error) {
         if (error.status) {
             return res
@@ -92,5 +133,6 @@ const deletePaymentMethod = async (req, res, next) => {
 module.exports = {
     postPaymentMethod,
     getPaymentMethods,
-    deletePaymentMethod
+    deletePaymentMethod,
+    updatePaymentMethod
 }
