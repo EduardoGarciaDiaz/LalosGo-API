@@ -1,12 +1,12 @@
 const mongoose = require('mongoose')
 const CategorySchema = require('../models/Category')
 
-const ACTIVE_CATEGORY = 'Active';
-const INACTIVE_CATEGORY = 'Inactive';
+const ACTIVE_CATEGORY = true;
+const INACTIVE_CATEGORY = false;
 
-const saveCategory = async(identif, categoryName) => {
+const saveCategory = async(identifier, name) => {
     try {
-        const repeatedCategory = await CategorySchema.findOne({$or: [{ name: name },{ _id: id }]});
+        const repeatedCategory = await CategorySchema.findOne({$or: [{ name: name },{ identifier: identifier }]});
         if(repeatedCategory){
             throw {
                 status: 400,
@@ -15,9 +15,9 @@ const saveCategory = async(identif, categoryName) => {
         }
 
         const newCategory = new CategorySchema({
-            identif,
-            categoryName,
-            ACTIVE_CATEGORY
+            identifier,
+            name,
+            categoryStatus: ACTIVE_CATEGORY
         })
         const savedCategory = await newCategory.save();
         const foundCategory = await CategorySchema.findById(savedCategory._id)
@@ -43,7 +43,7 @@ const updateCategory = async(categoryUpdate) => {
             }
         }
 
-        let savedCategory = await CategorySchema.findOneAndUpdate({_id: accommodation._id}, {$set: categoryUpdate}, {new: true})
+        let savedCategory = await CategorySchema.findOneAndUpdate({_id: categoryUpdate._id}, {$set: categoryUpdate}, {new: true})
         foundCategory = await CategorySchema.findById(savedCategory._id)
 
         return foundCategory;
@@ -72,9 +72,10 @@ const updateCategoryStatus = async(categoryUpdate) => {
 
         ///validar si es activar o inactivas, para validar si hay pedidos pendiente, y luego activar o desactivar los productos.
 
-        let savedCategory = await CategorySchema.findOneAndUpdate({_id: accommodation._id}, {$set: categoryUpdate}, {new: true})
+        let savedCategory = await CategorySchema.findOneAndUpdate({_id: categoryUpdate._id}, {$set: categoryUpdate}, {new: true})
         foundCategory = await CategorySchema.findById(savedCategory._id)
 
+     
         return foundCategory;
 
 
@@ -89,8 +90,31 @@ const updateCategoryStatus = async(categoryUpdate) => {
     }
 }
 
+const consultCategories = async() => {
+    try {
+        let categoriesFound = await CategorySchema.find();
+        if(!categoriesFound){
+            throw {
+                status: 404,
+                message: "No hay categorias actualmente."
+            }
+        }
+        return categoriesFound
+    } catch (error) {
+        if (error.status) {
+            throw {
+                status: error.status,
+                message: error.message
+            }
+        }
+        throw error;
+    }
+}
+
+
 module.exports = {
     saveCategory,
     updateCategory,
-    updateCategoryStatus
+    updateCategoryStatus, 
+    consultCategories
 }

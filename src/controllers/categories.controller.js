@@ -4,7 +4,8 @@ const createCategory = async(req, res, next) => {
     try {
         const {identifier, name, categoryStatus} = req.body
         resultOperation = await CategoriesService.saveCategory(identifier, name)
-        res.status(201).send({
+        
+        return res.status(201).send({
             message: "Categoría creada exitosamente.",
             category: resultOperation
         })
@@ -22,12 +23,12 @@ const editCategory = async(req, res, next) => {
     try {
         const _id = req.params.categoryId
         const {changeStatus} = req.query;
-        const {identifier, name, status} =  req.body
+        const {identifier, name, categoryStatus} =  req.body
         const categoryToUpdate = {
             _id, 
             identifier,
             name,
-            status
+            categoryStatus
         }
         let resultOperation
         let message
@@ -40,11 +41,11 @@ const editCategory = async(req, res, next) => {
                 message = "La categoría se ha desactivado correctamente."
             }
         }else{
-            resultOperation = await CategoriesService.updateCategoryStatus(categoryToUpdate)
+            resultOperation = await CategoriesService.updateCategory(categoryToUpdate)
             message = "La categoría se ha actualizado exitosamente"
         }
 
-        res.status(200)({
+        return res.status(200).send({
             message: message,
             category: resultOperation
         })
@@ -59,7 +60,26 @@ const editCategory = async(req, res, next) => {
     }
 }
 
+const consultCategories = async(req, res, next) => {
+    try {
+        let resultOperation = await CategoriesService.consultCategories()
+
+        return res.status(200).send({
+            message: "",
+            category: resultOperation
+        })
+    } catch (error) {
+        if (error.status) {
+            return res
+                .status(error.status)
+                .send({message: error.message});
+        }
+        next(error)
+    }
+}
+
 module.exports  = {
     createCategory,
-    editCategory
+    editCategory,
+    consultCategories
 }

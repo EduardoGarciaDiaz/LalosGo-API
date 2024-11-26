@@ -15,8 +15,7 @@ categorySchema = new mongoose.Schema({
         index: true
     },
     categoryStatus: {
-        type: String,
-        enum:['Active', 'Inactive'],
+        type: Boolean,
         required: true 
     }
 },
