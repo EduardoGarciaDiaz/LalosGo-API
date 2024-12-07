@@ -7,7 +7,7 @@ branchSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    openingHour: {
+    openingTime: {
         type: String, //#Formato 24:00
         required: true
     },
@@ -59,6 +59,10 @@ branchSchema = new mongoose.Schema({
                 required: true
             }
         }       
+    },
+    branchStatus: {
+        type: Boolean,
+        required: true 
     },
     branchProducts: [{
         product: {
