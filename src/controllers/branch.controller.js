@@ -76,8 +76,8 @@ const editBranch = async(req, res, next) => {
 
 const consultBranches = async(req, res, next) => {
     try {
-        let {recoverProduct} = res.query
-        if(recoverProduct){
+        let {recoverProduct} = req.query
+        if(recoverProduct !== undefined && recoverProduct){
             resultOperation = await BranchService.consultBranches(true)
         }else{
             resultOperation = await BranchService.consultBranches(false)
@@ -96,8 +96,27 @@ const consultBranches = async(req, res, next) => {
     }
 }
 
+const toggleBranchStatus = async(req, res, next) => {
+    try {
+        let {branchId} = req.params
+        let resultOperation = await BranchService.toggleBranchStatus(branchId);
+        return res.status(200).send({
+            message: "Estado de sucursal actualizado.",
+            branch: resultOperation
+        })
+    } catch (error) {
+        if (error.status) {
+            return res
+                .status(error.status)
+                .send({message: error.message});
+        }
+        next(error)
+    }
+}
+
 module.exports = {
     createBranch, 
     editBranch,
-    consultBranches
+    consultBranches,
+    toggleBranchStatus
 }

@@ -42,7 +42,7 @@ const updateBranch = async(branchToUpdate, isStatusChange) => {
         let updatedBranch = await BranchSchema.findOneAndUpdate({_id:branchToUpdate._id}, {$set: branchToUpdate}, {new: true})
         foundBranch = await BranchSchema.findById(updatedBranch._id)
         if(isStatusChange){
-            await updateBranchStatus(foundBranch)
+            await updateBranchStatuss(foundBranch)
         }
         return foundBranch
     } catch (error) {
@@ -84,29 +84,61 @@ const updateBranchProductsQuantity = async(branchToUpdate, productsToAdd) => {
     }
 }
 
-async function updateBranchStatus(branchToChangeStatus) {
+async function updateBranchStatuss(branchToChangeStatus) {
     //Desactivar empleador de la empresa.
 }
 
 const consultBranches = async(isRecoveringProducts) => {
     try {
-        let foundBranches
-        if(isRecoveringProducts){
-            foundBranches  = await BranchSchema.find()
-        }else{
-            foundBranches = await BranchSchema.find({}, {branchProducts: 0})
+        let foundBranches;
+
+        if (isRecoveringProducts) {
+            foundBranches  = await BranchSchema.find();
+        } else {
+            foundBranches = await BranchSchema.find({}, {branchProducts: 0});
         }
- 
-        if(!foundBranches){
-            throw{
+
+        if (!foundBranches || foundBranches.length === 0) {
+            throw {
                 status: 404,
-                message: "No existen sucursales registradas, registre una para visualizarla."
+                message: "No se encontraron sucursales registradas"
             }
         }
-        return foundBranches
+
+        return foundBranches;
+
     } catch (error) {
-        if(error.status){
-            throw{
+        if (error.status) {
+            throw {
+                status: error.status,
+                message: error.message
+            }
+        }
+        throw error
+    }
+}
+
+const toggleBranchStatus = async(branchId, newStatus) => {
+    try {
+        const branchFound = await BranchSchema.findById(branchId);
+
+        if (!branchFound) {
+            throw {
+                status: 404,
+                message: "La sucursal que quieres actualizar no existe."
+            }
+        }
+
+        let newBranchStatus = branchFound.branchStatus === ACTIVE_BRANCH ? INACTIVE_BANCH : ACTIVE_BRANCH;
+
+        branchFound.branchStatus = newBranchStatus;
+        await branchFound.save();
+
+        return branchFound;
+    }
+    catch (error) {
+        if (error.status) {
+            throw {
                 status: error.status,
                 message: error.message
             }
@@ -119,7 +151,8 @@ module.exports = {
     saveBranch,
     updateBranch,
     updateBranchProductsQuantity,
-    consultBranches
+    consultBranches,
+    toggleBranchStatus
 }
 
 

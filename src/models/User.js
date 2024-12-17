@@ -59,10 +59,6 @@ const clientSchema = new mongoose.Schema({
             required: false
         },
         expirationDate: {
-            type: String, // Formato MM/YY
-            required: true,
-        },
-        cvv: {
             type: String,
             required: true,
         },

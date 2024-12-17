@@ -4,6 +4,8 @@ const postPaymentMethod = async (userId, newPaymentMethod) => {
     try {
         //TODO: Validar que el Id sea válido
 
+        //TODO: Validar que la fecha de expiración sea válida
+
         //TODO: Validar que No tenga 3 tarjetas YA registradas
 
         if (newPaymentMethod.cardNumber) {

@@ -8,7 +8,7 @@ const postPaymentMethod = async (req, res, next) => {
             return res.status(400).send({error: `El id del usuario '${userId}' viene nulo o vacío`})
         }
 
-        const { cardOwner, cardNumber, cardEmitter, expirationDate, cvv, cardType, paymentNetwork } = req.body;
+        const { cardOwner, cardNumber, cardEmitter, expirationDate, cardType, paymentNetwork } = req.body;
 
         //TODO: Validar campos no nulos o vacios
 
@@ -17,7 +17,6 @@ const postPaymentMethod = async (req, res, next) => {
             cardNumber,
             cardEmitter,
             expirationDate,
-            cvv,
             cardType,
             paymentNetwork
         }
