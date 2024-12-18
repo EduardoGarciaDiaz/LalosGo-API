@@ -169,9 +169,7 @@ const updatePaymentMethod = async (userId, paymentMethodId, updatedPaymentMethod
 
 const getUserLogin = async (username) => {
     try {
-        const userFound = await User.findOne({
-            where: { username: username }
-        })
+        const userFound = await User.findOne({username})
 
         if (!userFound) {
             throw {
@@ -179,11 +177,36 @@ const getUserLogin = async (username) => {
                 message: "Usuario no encontrado"
             };
         }
+        
+        if (userFound.client) {
 
-        return userFound;
+            return {
+                fullname: userFound.fullname,
+                role: 'Cliente',
+                password: userFound.password,
+                email: userFound.email
+            };
+        } else if (userFound.employee) {
+            return {
+                fullname: userFound.fullname,
+                role: userFound.employee.role,
+                password: userFound.password,
+                email: userFound.email
+            };
+        }
+        throw {
+            status: 400,
+            message: "El usuario no tiene un rol asignado"
+        };
 
     } catch (error) {
-        next(error);
+        if (error.status) {
+            throw {
+                status: error.status,
+                message: error.message
+            }
+        }
+        throw error;
     }
 }
 

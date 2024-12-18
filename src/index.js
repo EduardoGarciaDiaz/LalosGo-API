@@ -10,7 +10,7 @@ const PORT = process.env.SERVER_PORT || 3000
 
 app.use(cors());
 
-const errorhandler = require('./middlewares/errorhandler.middleware')
+const errorhandler = require('./middlewares/errorHandler.middleware')
 app.use(errorhandler)
 
 app.use("/api/v1", v1Router)

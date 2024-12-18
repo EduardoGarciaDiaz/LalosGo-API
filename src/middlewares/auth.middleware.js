@@ -15,7 +15,8 @@ const authorize = (rol) => {
 
             const token = authHeader.split(' ')[1];
             const decodedToken = jwt.verify(token, jwtSecret);
-            if (rol.split(',').indexOf(decodedToken.rol) == -1) {
+            
+            if (rol.split(',').indexOf(decodedToken.role) == -1) {
                 return next(error);
             }
 
