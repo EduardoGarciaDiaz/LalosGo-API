@@ -23,10 +23,6 @@ const clientSchema = new mongoose.Schema({
             type: String,
             required: true
         },
-        municipality : {
-            type: String,
-            required: true
-        },
         federalEntity: {
             type: String,
             required: true
@@ -40,8 +36,12 @@ const clientSchema = new mongoose.Schema({
             enum: ['Point'],
             required: true
         },
-        coordinates: {
-            type: [Number],
+        latitude: {
+            type: String,
+            required: true
+        }, 
+        longitute: {
+            type: String, 
             required: true
         }
     }],
