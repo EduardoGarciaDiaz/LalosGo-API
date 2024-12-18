@@ -4,6 +4,7 @@ const UserRoutes = require('./user.routes');
 const BranchRoutes = require('./branch.routes')
 const EmployeeRoutes = require('./employee.routes')
 const AuthRoutes = require('./auth.routes')
+const OrderRoutes = require('./order.routes')
 
 const router = express.Router();
 
@@ -14,6 +15,7 @@ router.use('/employees', EmployeeRoutes)
 router.use('/auth', AuthRoutes)
 
 
+router.use('/orders', OrderRoutes)
 
 router.use('*', (req, res) => { res.status(404).send()})
 
