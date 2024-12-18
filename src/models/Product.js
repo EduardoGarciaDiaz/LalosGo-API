@@ -31,8 +31,7 @@ productSchema = new mongoose.Schema({
         required: true
     },
     productStatus: {
-        type: String,
-        enum:['Active', 'Inactive'],
+        type: Boolean,
         required: true 
     },
     unitMeasure: {
