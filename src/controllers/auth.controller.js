@@ -1,4 +1,4 @@
-const bcrpt = require('bcrypt');
+const bcrypt = require('bcrypt');
 const { generateToken } = require('../security/jwt');
 const UserService = require('../services/users.service');
 
@@ -13,7 +13,7 @@ self.login = async function (req, res, next) {
             return res.status(404).json({ message: 'Usuario o contraseña incorrectos' });
         }
 
-        const match = await bcrpt.compare(password, data.password);
+        const match = await bcrypt.compare(password, data.password);
 
         if (!match) {
             return res.status(401).json({ message: 'Usuario o contraseña incorrectos' });

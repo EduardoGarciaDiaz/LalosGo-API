@@ -2,32 +2,32 @@ const fs = require('fs');
 const requestIp = require('request-ip');
 
 const errorHandler = (err, req, res, next) => {
-    let mensaje = 'No se ha podido procesar la petición. Inténtelo de nuevo más tarde.';
+    let message = 'No se ha podido procesar la petición. Inténtelo de nuevo más tarde.';
     const statusCode = err.status || 500;
     const ip = requestIp.getClientIp(req);
 
-    let usuario = 'Anónimo';
+    let user = 'Anónimo';
 
     if (req.decodedToken) {
-        usuario = req.decodedToken.email;
+        user = req.decodedToken.username;
     }
 
-    fs.appendFile('logs/error.log', new Date() + ` - ${statusCode} - ${ip} - ${usuario} - ${err.message || mensaje}\n`, (err) => {
+    fs.appendFile('logs/error.log', new Date() + ` - ${statusCode} - ${ip} - ${user} - ${(err.message || message)}\n`, (err) => {
         if (err) {
-            console.log(err);
+            console.log(err)
         }
     })
 
     if (process.env.NODE_ENV === 'development') {
-        mensaje = err.message || mensaje
+        message = err.message || message
 
         res.status(statusCode).json({
             status: statusCode,
-            mensaje: mensaje,
+            message: message,
             stack: err.stack
         })
     } else {
-        res.status(statusCode).send({ mensaje: mensaje })
+        res.status(statusCode).send({ message: message })
     }
 }
 
