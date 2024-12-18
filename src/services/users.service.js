@@ -1,3 +1,4 @@
+const { raw } = require('express');
 const User = require('../models/User');
 
 const postPaymentMethod = async (userId, newPaymentMethod) => {
@@ -10,7 +11,7 @@ const postPaymentMethod = async (userId, newPaymentMethod) => {
 
         if (newPaymentMethod.cardNumber) {
             const existingCard = await User.findOne({ 'paymentMethods.cardNumber': newPaymentMethod.cardNumber });
-            
+
             //TODO: Validar que la tarjeta no esté registrada a el usuario
             if (existingCard && existingCard._id.toString() == userId) {
                 console.log('El método de pago ya está registrado.');
@@ -41,7 +42,7 @@ const postPaymentMethod = async (userId, newPaymentMethod) => {
             await userFound.save();
 
             const addedPaymentMethod = userFound.client.paymentMethods[userFound.client.paymentMethods.length - 1];
-            return addedPaymentMethod; 
+            return addedPaymentMethod;
         }
     } catch (error) {
         if (error.status) {
@@ -51,7 +52,7 @@ const postPaymentMethod = async (userId, newPaymentMethod) => {
             }
         }
         throw error;
-    }   
+    }
 }
 
 const getPaymentMethods = async (userId) => {
@@ -70,7 +71,7 @@ const getPaymentMethods = async (userId) => {
         const paymentMethods = userFound.client.paymentMethods;
 
         return paymentMethods;
-        
+
     } catch (error) {
         if (error.status) {
             throw {
@@ -79,7 +80,7 @@ const getPaymentMethods = async (userId) => {
             }
         }
         throw error;
-    }   
+    }
 }
 
 const deletePaymentMethod = async (userId, paymentMethodId) => {
@@ -110,7 +111,7 @@ const deletePaymentMethod = async (userId, paymentMethodId) => {
         }
 
         userFound.client.paymentMethods.pull(paymentMethodId);
-        
+
         await userFound.save();
 
         return paymentMethodFound;
@@ -122,7 +123,7 @@ const deletePaymentMethod = async (userId, paymentMethodId) => {
             }
         }
         throw error;
-    }   
+    }
 }
 
 const updatePaymentMethod = async (userId, paymentMethodId, updatedPaymentMethod) => {
@@ -166,9 +167,31 @@ const updatePaymentMethod = async (userId, paymentMethodId, updatedPaymentMethod
     }
 }
 
-module.exports = { 
+const getUserLogin = async (username) => {
+    try {
+        const userFound = await User.findOne({
+            where: { username: username }
+        })
+
+        if (!userFound) {
+            throw {
+                status: 404,
+                message: "Usuario no encontrado"
+            };
+        }
+
+        return userFound;
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+
+module.exports = {
     postPaymentMethod,
     getPaymentMethods,
     deletePaymentMethod,
-    updatePaymentMethod
+    updatePaymentMethod,
+    getUserLogin
 }
