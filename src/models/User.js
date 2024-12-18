@@ -23,10 +23,6 @@ const clientSchema = new mongoose.Schema({
             type: String,
             required: true
         },
-        municipality : {
-            type: String,
-            required: true
-        },
         federalEntity: {
             type: String,
             required: true
@@ -40,8 +36,12 @@ const clientSchema = new mongoose.Schema({
             enum: ['Point'],
             required: true
         },
-        coordinates: {
-            type: [Number],
+        latitude: {
+            type: String,
+            required: true
+        }, 
+        longitute: {
+            type: String, 
             required: true
         }
     }],
@@ -78,8 +78,8 @@ const clientSchema = new mongoose.Schema({
 const employeeSchema = new mongoose.Schema({
     username: {
         type: String,
-        required: true,
-        unique: true
+        required: false,
+        index: true,
     },
     role: {
         type: String,
@@ -105,34 +105,34 @@ userSchema = new mongoose.Schema({
     },
     birthdate: {
         type: Date,
-        required: true
+        required: true,
     },
     phone: {
         type: Number,
         required: true,
         unique: true,
     },
-    password: {
-        type: String,
-        required: true,
-    },
-    username: {
+    email: {
         type: String,
         required: false,
-        indexe: true
+        unique: true,
+    },
+    password: {
+        type: String,
+        required: true
     },   
     status: {
         type: String,
         enum:['Active', 'Inactive'],
-        required: true
+        required: true,
     },
     client: {
         type: clientSchema,
-        required: false
+        required: false,
     },
     employee: {
         type: employeeSchema,
-        required: false
+        required: false,
     }    
 },
 {

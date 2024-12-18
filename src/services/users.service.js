@@ -169,7 +169,7 @@ const updatePaymentMethod = async (userId, paymentMethodId, updatedPaymentMethod
 
 const getUserLogin = async (username) => {
     try {
-        const userFound = await User.findOne({username})
+        const userFound = await User.findOne({ username })
 
         if (!userFound) {
             throw {
@@ -177,7 +177,7 @@ const getUserLogin = async (username) => {
                 message: "Usuario no encontrado"
             };
         }
-        
+
         if (userFound.client) {
 
             return {
@@ -208,13 +208,82 @@ const getUserLogin = async (username) => {
         }
         throw error;
     }
+};
+
+const createClientAccount = async (newClientAccount) => {
+    try {
+        const newUser = new User(newClientAccount);
+        await newUser.save();
+        return newUser;
+
+    } catch (error) {
+        if (error.status) {
+            throw {
+                status: error.status,
+                message: error.message
+            }
+        }
+        throw error;
+    }
 }
 
+const updateClientAccount = async (userId, updatedClientAccount) => {
+    try {
+        const userFound = await User.findById(userId);
+
+        if (!userFound) {
+            throw {
+                status: 404,
+                message: "Usuario no encontrado"
+            };
+        }
+
+        userFound.set(updatedClientAccount);
+        await userFound.save();
+        return userFound;
+    } catch (error) {
+        if (error.status) {
+            throw {
+                status: error.status,
+                message: error.message
+            }
+        }
+        throw error;
+    }
+}
+
+const recoverPassword = async (userId, newPassword) => {
+    try {
+        const userFound = await User.findOne(userId);
+
+        if (!userFound) {
+            throw {
+                status: 404,
+                message: "Usuario no encontrado"
+            };
+        }
+
+        userFound.password.set(newPassword);
+        userFound.save();
+        return userFound;
+    } catch (error) {
+        if (error.status) {
+            throw {
+                status: error.status,
+                message: error.message
+            }
+        }
+        throw error;
+    }
+}
 
 module.exports = {
     postPaymentMethod,
     getPaymentMethods,
     deletePaymentMethod,
     updatePaymentMethod,
+    createClientAccount,
+    updateClientAccount,
+    recoverPassword,
     getUserLogin
 }
