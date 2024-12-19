@@ -1,5 +1,6 @@
 const UserService = require('../services/users.service');
 const User = require('../models/User');
+const bcrypt = require('bcrypt');
 
 const postPaymentMethod = async (req, res, next) => {
     try {
@@ -131,23 +132,27 @@ const updatePaymentMethod = async (req, res, next) => {
 
 const createClientAccount = async (req, res, next) => {
     try{
-        const { fullname, birthdate, phone, email, password} = req.body;
+        const { username,fullname, birthdate, phone, email, password, client} = req.body;
 
-        const existinguser = await userService.findUserByEmailOrPhoneNumber(email, phone);
+        const existinguser = await userService.findUserByEmailOrPhoneNumber(email, phone, username);
         
         if (existinguser) {
             return res.status(400).send({message: "Error al registrar los datos del usuario"});
         }
 
         const newClientAccount = {
+            username,
             fullname,
             birthdate,
             phone,
             email,
             password,
             status: 'Active', 
+            client,
         }
+
         const result = await UserService.createClientAccount(newClientAccount);
+
         return res.status(201).send({
             message: "Cuenta de cliente creada correctamente",
             newClientAccount: result
@@ -164,7 +169,7 @@ const createClientAccount = async (req, res, next) => {
 
 const findUserByEmailOrPhoneNumber = async (email, phone) => {
     const user = UserModel.findOne({
-        $or: [{email}, {phone}]
+        $or: [{email}, {phone}, {username}]
     });
     return user;
 }
@@ -188,12 +193,6 @@ const updateClientAccount = async (req, res, next) => {
             newClientAccount: result
         });
     }catch (error) {
-        console.log("Entró al catch " + error);
-        if (error.status) {
-            return res
-                .status(error.status)
-                .send({message: error.message});
-        }
         next(error)
     }
 }
