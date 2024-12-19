@@ -5,25 +5,30 @@ const bcrypt = require('bcrypt');
 const EmployeesService = {};
 
 EmployeesService.getAllEmployees = async function (searchQuery) {
-    const filters = { employee: { $exists: true } }; 
-    if (searchQuery) {
-        filters['fullname'] = {
-            $regex: searchQuery,
-            $options: 'i'
-        };
-    }
+    try {
 
-    return await User.find(filters).select('-password');
+        const filters = { employee: { $exists: true } };
+        if (searchQuery) {
+            filters['fullname'] = {
+                $regex: searchQuery,
+                $options: 'i'
+            };
+        }
+
+        return await User.find(filters).select('-password');
+    } catch (error) {
+        throw error;
+    }
 };
 
 EmployeesService.getEmployee = async function (id) {
-    try{
+    try {
         if (!mongoose.Types.ObjectId.isValid(id)) {
             const error = new Error('Empleado no encontrado');
             error.status = 404;
             throw error;
         }
-        
+
         let foundEmployee = await User.findById(id).select('-password');
 
         return foundEmployee;
@@ -94,7 +99,7 @@ EmployeesService.updateEmployee = async function (id, employee, isStatusChanged)
                 { email: employee.email },
                 { phone: employee.phone }
             ],
-            _id: { $ne: id } 
+            _id: { $ne: id }
         });
 
         if (repeatedEmployee) {

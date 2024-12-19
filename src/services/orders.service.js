@@ -10,19 +10,19 @@ const cartToOrder = async (orderDetails) => {
                 message: "Faltan datos"
             };
         }
-    
-        const order = await Order.findOne({ 
+
+        const order = await Order.findOne({
             _id: orderDetails.orderId,
-            customer: orderDetails.customer 
+            customer: orderDetails.customer
         }).exec();
-    
+
         if (!order) {
             throw {
                 status: 404,
                 message: "Carrito no encontrado o no pertenece al usuario"
             };
         }
-    
+
         order.set({
             orderNumber: orderDetails.orderNumber,
             orderDate: orderDetails.orderDate,
@@ -31,7 +31,7 @@ const cartToOrder = async (orderDetails) => {
             statusOrder: orderDetails.statusOrder,
             paymentMethod: orderDetails.paymentMethod
         });
-    
+
         return await reserveCartProducts(order);
 
     } catch (error) {
@@ -126,7 +126,7 @@ async function reserveCartProducts(order) {
         }
 
         await order.save();
-        
+
         return await Order.findById(order._id)
             .populate('orderProducts.product')
             .exec();
@@ -160,6 +160,38 @@ async function rollbackUpdates(branchId, productUpdates) {
     }
 }
 
-module.exports = {
-    cartToOrder
+const getAllOrders = async function () {
+    try {
+        const orders = await Order.find({});
+        return orders;
+    } catch (error) {
+        throw error;
+    }
 }
+
+const getAllOrdersByCustomer = async function (customerId) {
+    try {
+        const orders = await Order.find({ _id: customerId });
+        return orders;
+    }
+    catch (error) {
+        throw error;
+    }
+}
+
+const getAllOrdersByDeliveryPerson = async function (deliveryPersonId) {
+    try {
+        const orders = await Order.find({ _id: deliveryPersonId });
+        return orders;
+    }
+    catch (error) {
+        throw error;
+    }
+}
+
+    module.exports = {
+        cartToOrder,
+        getAllOrders,
+        getAllOrdersByCustomer,
+        getAllOrdersByDeliveryPerson
+    }

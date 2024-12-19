@@ -180,7 +180,7 @@ const getUserLogin = async (username) => {
             return {
                 id: userFound._id.toString(),
                 fullname: userFound.fullname,
-                role: 'Cliente',
+                role: 'Customer',
                 password: userFound.password,
                 email: userFound.email
             };

@@ -1,12 +1,18 @@
 const OrderService = require('../services/orders.service.js');
 const CartService = require('../services/carts.service.js');
+const dotenv = require('dotenv');
+dotenv.config();
+const jwt = require('jsonwebtoken');
+const jwtSecret = process.env.JWT_SECRET;
 
-const cartToOrder = async (req, res, next) => {
+let self = {}
+
+self.cartToOrder = async (req, res, next) => {
     try {
         const orderId = req.params.orderId;
         const status = req.query.status;
         let defaultOrderStatus = 'pending';
-        const { customer, branch, paymentMethod, orderProducts} = req.body;
+        const { customer, branch, paymentMethod, orderProducts } = req.body;
 
         if (status !== 'reserved') {
             throw {
@@ -49,12 +55,33 @@ const cartToOrder = async (req, res, next) => {
         if (error.status) {
             return res
                 .status(error.status)
-                .send({message: error.message});
+                .send({ message: error.message });
         }
         next(error)
     }
 }
 
-module.exports = {
-    cartToOrder
+self.getAll = async (req, res, next) => {
+    try {
+        const decodedToken = jwt.verify(token, jwtSecret);
+        const { role } = decodedToken;
+
+        const data = {};
+        switch (role) {
+            case 'Customer':
+                data = await OrderService.getAllOrdersByCustomer(decodedToken.id);
+                break;
+            case 'Delivery Person':
+                data = await OrderService.getAllOrdersByDeliveryPerson(decodedToken.id);
+                break;
+            default:
+                data = await OrderService.getAllOrders();
+                break;
+        }
+        return res.status(200).json(data);
+    } catch (error) {
+        next(error);
+    }
 }
+
+module.exports = self;
