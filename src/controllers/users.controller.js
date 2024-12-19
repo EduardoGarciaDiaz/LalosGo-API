@@ -193,12 +193,6 @@ const updateClientAccount = async (req, res, next) => {
             newClientAccount: result
         });
     }catch (error) {
-        console.log("Entró al catch " + error);
-        if (error.status) {
-            return res
-                .status(error.status)
-                .send({message: error.message});
-        }
         next(error)
     }
 }

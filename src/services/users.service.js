@@ -225,10 +225,8 @@ const updateClientAccount = async (userId, updatedClientAccount) => {
         const userFound = await User.findById(userId);
 
         if (!userFound) {
-            throw {
-                status: 404,
-                message: "Usuario no encontrado"
-            };
+            const error = new Error('Usuario no encontrado');
+            error.status = 404;
         }
 
         userFound.set(updatedClientAccount);
