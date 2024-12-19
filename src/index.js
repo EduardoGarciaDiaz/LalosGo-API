@@ -5,14 +5,6 @@ const v1Router = require("./v1/routes")
 const cors = require('cors');
 
 
-const grpc = require('@grpc/grpc-js')
-const protoLoader = require('@grpc/proto-loader')
-const fs = require('fs')
-const PROTO_PATH = "./src/images.proto";
-const packageDefinition = protoLoader.loadSync(PROTO_PATH)
-const ImageProto = grpc.loadPackageDefinition(packageDefinition).ImageService
-const Image_Service = require('./GRPC/ImagesService')
-
 
 
 require('./database')
@@ -31,13 +23,7 @@ server = app.listen(PORT, '0.0.0.0', () => {
 })
 
 
-const grpcServer = new grpc.Server()
-grpcServer.addService(ImageProto.service,{UploadProductImage: Image_Service.UploadProductImage})
-grpcServer.bindAsync(`0.0.0.0:${GRPC_PORT}`, grpc.ServerCredentials.createInsecure(), () => {
-    console.log(`GRPC listening on port:${GRPC_PORT}`)   
-})
 
 module.exports = {
-    server,
-    grpcServer
+    server    
 }
