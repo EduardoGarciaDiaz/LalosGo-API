@@ -178,7 +178,7 @@ const getUserLogin = async (username) => {
         if (userFound.client) {
 
             return {
-                id: userFound._id,
+                id: userFound._id.toString(),
                 fullname: userFound.fullname,
                 role: 'Cliente',
                 password: userFound.password,
@@ -186,7 +186,7 @@ const getUserLogin = async (username) => {
             };
         } else if (userFound.employee) {
             return {
-                id: userFound._id,
+                id: userFound._id.toString(),
                 fullname: userFound.fullname,
                 role: userFound.employee.role,
                 password: userFound.password,

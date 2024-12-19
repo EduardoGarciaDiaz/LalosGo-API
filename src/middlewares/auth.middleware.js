@@ -17,6 +17,7 @@ const authorize = (rol) => {
 
             const token = authHeader.split(' ')[1];
             const decodedToken = jwt.verify(token, jwtSecret);
+            console.log(decodedToken);
             
             if (rol.split(',').indexOf(decodedToken.role) == -1) {
                 return next(error);
@@ -26,7 +27,7 @@ const authorize = (rol) => {
 
             var minutesLeft = (decodedToken.exp - (new Date().getTime() / 1000)) / 60;
             if (minutesLeft < 5) {
-                var newToken = generateToken(decodedToken.email, decodedToken.name, decodedToken.rol);
+                var newToken = generateToken(decodedToken.id, decodedToken.email, decodedToken.name, decodedToken.role);
                 res.header("Set-Authorization", newToken);
             }
 

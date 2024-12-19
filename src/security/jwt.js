@@ -4,8 +4,9 @@ dotenv.config();
 
 const jwtSecret = process.env.JWT_SECRET;
 
-const generateToken = (email, name, role) => {
+const generateToken = (id, email, name, role) => {
     const token = jwt.sign({
+        id,
         email,
         name,
         role,
