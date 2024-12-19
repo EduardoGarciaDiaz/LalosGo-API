@@ -140,14 +140,12 @@ const createClientAccount = async (req, res, next) => {
             return res.status(400).send({message: "Error al registrar los datos del usuario"});
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
-
         const newClientAccount = {
             fullname,
             birthdate,
             phone,
             email,
-            hashedPassword,
+            password,
             status: 'Active', 
         }
         const result = await UserService.createClientAccount(newClientAccount);
