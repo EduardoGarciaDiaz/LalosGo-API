@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const User = require('../models/User');
+const bcrypt = require('bcrypt');
 
 const EmployeesService = {};
 
@@ -38,19 +39,26 @@ EmployeesService.getEmployee = async function (id) {
 
 EmployeesService.saveEmployee = async function (employee) {
     try {
-        const repeatedEmployee = await User.findOne({ 'employee.username': employee.username });
+        const repeatedEmployee = await User.findOne({
+            $or: [
+                { username: employee.username },
+                { email: employee.email },
+                { phone: employee.phone }
+            ]
+        });
+
         if (repeatedEmployee) {
-            throw {
-                status: 400,
-                message: "El empleado ya se encuentra registrado"
-            };
+            const error = new Error("El empleado ya se encuentra registrado con el mismo username, email o teléfono");
+            error.status = 400;
+            throw error;
         }
 
         const newUser = new User({
             fullname: employee.fullname,
+            email: employee.email,
             birthdate: employee.birthdate,
             phone: employee.phone,
-            password: employee.password,
+            password: bcrypt.hashSync(employee.password, 10),
             username: employee.username,
             status: 'Active',
             employee: {
@@ -61,13 +69,21 @@ EmployeesService.saveEmployee = async function (employee) {
             }
         });
 
-        return await newUser.save();
+        await newUser.save();
+
+        const savedUser = await User.findById(newUser._id).select('-password');
+
+        return savedUser;
+
     } catch (error) {
+        if (!error.status) {
+            error.status = 500;
+        }
         throw error;
     }
 };
 
-EmployeesService.updateEmployee = async function (id, employee, isStatusChanged){
+EmployeesService.updateEmployee = async function (id, employee, isStatusChanged) {
     try {
         let foundEmployee = await User.findById(id);
         if (!foundEmployee) {
@@ -77,12 +93,35 @@ EmployeesService.updateEmployee = async function (id, employee, isStatusChanged)
             };
         }
 
-        let updatedEmployee = await User.findOneAndUpdate({ _id: id }, { $set: employee }, { new: true });
-        foundEmployee = await User.findById(updatedEmployee._id);
-        if (isStatusChanged) {
-            await updateEmployeeStatus(foundEmployee);
+        const repeatedEmployee = await User.findOne({
+            $or: [
+                { username: employee.username },
+                { email: employee.email },
+                { phone: employee.phone }
+            ],
+            _id: { $ne: id } 
+        });
+
+        if (repeatedEmployee) {
+            throw {
+                status: 400,
+                message: "Otro empleado ya tiene el mismo username, email o teléfono"
+            };
         }
-        return foundEmployee;
+
+        const updatedEmployee = await User.findOneAndUpdate(
+            { _id: id },
+            { $set: employee },
+            { new: true }
+        );
+
+        if (isStatusChanged) {
+            await updateEmployeeStatus(updatedEmployee);
+        }
+
+        const { password, ...employeeWithoutPassword } = updatedEmployee.toObject();
+        return employeeWithoutPassword;
+
     } catch (error) {
         if (error.status) {
             throw {
@@ -90,7 +129,10 @@ EmployeesService.updateEmployee = async function (id, employee, isStatusChanged)
                 message: error.message
             };
         }
-        throw error;
+        throw {
+            status: 500,
+            message: "Error interno del servidor"
+        };
     }
 };
 

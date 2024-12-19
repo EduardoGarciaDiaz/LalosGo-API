@@ -1,6 +1,5 @@
 const UserService = require('../services/users.service');
 const User = require('../models/User');
-const { use } = require('../v1/routes/user.routes');
 const bcrypt = require('bcrypt');
 
 const postPaymentMethod = async (req, res, next) => {
