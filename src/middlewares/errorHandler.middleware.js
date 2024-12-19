@@ -6,17 +6,19 @@ const errorHandler = (err, req, res, next) => {
     const statusCode = err.status || 500;
     const ip = requestIp.getClientIp(req);
 
-    let user = 'Anónimo';
+    let email = 'Anónimo';
 
     if (req.decodedToken) {
-        user = req.decodedToken.username;
+        email = req.decodedToken.email;
     }
 
-    fs.appendFile('logs/error.log', new Date() + ` - ${statusCode} - ${ip} - ${user} - ${(err.message || message)}\n`, (err) => {
+    fs.appendFile('logs/error.log', new Date() + ` - ${statusCode} - ${ip} - ${email} - ${(err.message || message)}\n`, (err) => {
         if (err) {
             console.log(err)
         }
     })
+
+    console.log(process.env.NODE_ENV)
 
     if (process.env.NODE_ENV === 'development') {
         message = err.message || message
@@ -31,4 +33,4 @@ const errorHandler = (err, req, res, next) => {
     }
 }
 
-module.exports = errorHandler
+module.exports = errorHandler;

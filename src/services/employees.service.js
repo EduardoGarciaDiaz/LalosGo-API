@@ -18,12 +18,14 @@ EmployeesService.getAllEmployees = async function (searchQuery) {
 
 EmployeesService.getEmployee = async function (id) {
     try{
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return null;
+        }
+        
         let foundEmployee = await User.findById(id);
+
         if(!foundEmployee){
-            throw {
-                status: 404,
-                message: "El empleado que buscas no existe"
-            }
+            return null;
         }
         return foundEmployee;
     } catch (error) {
@@ -48,9 +50,7 @@ EmployeesService.saveEmployee = async function (employee) {
         });
 
         if (repeatedEmployee) {
-            const error = new Error("El empleado ya se encuentra registrado con el mismo username, email o teléfono");
-            error.status = 400;
-            throw error;
+            return null;
         }
 
         const newUser = new User({
@@ -58,7 +58,7 @@ EmployeesService.saveEmployee = async function (employee) {
             email: employee.email,
             birthdate: employee.birthdate,
             phone: employee.phone,
-            password: bcrypt.hashSync(employee.password, 10),
+            password: bcrypt.hash(employee.password, 10),
             username: employee.username,
             status: 'Active',
             employee: {
@@ -85,14 +85,6 @@ EmployeesService.saveEmployee = async function (employee) {
 
 EmployeesService.updateEmployee = async function (id, employee, isStatusChanged) {
     try {
-        let foundEmployee = await User.findById(id);
-        if (!foundEmployee) {
-            throw {
-                status: 404,
-                message: "El empleado que quieres editar no existe"
-            };
-        }
-
         const repeatedEmployee = await User.findOne({
             $or: [
                 { username: employee.username },
@@ -103,13 +95,10 @@ EmployeesService.updateEmployee = async function (id, employee, isStatusChanged)
         });
 
         if (repeatedEmployee) {
-            throw {
-                status: 400,
-                message: "Otro empleado ya tiene el mismo username, email o teléfono"
-            };
+            return null;
         }
 
-        const updatedEmployee = await User.findOneAndUpdate(
+        await User.findOneAndUpdate(
             { _id: id },
             { $set: employee },
             { new: true }
@@ -119,8 +108,7 @@ EmployeesService.updateEmployee = async function (id, employee, isStatusChanged)
             await updateEmployeeStatus(updatedEmployee);
         }
 
-        const { password, ...employeeWithoutPassword } = updatedEmployee.toObject();
-        return employeeWithoutPassword;
+        const updatedEmployee = await User.findById(id).select('-password');
 
     } catch (error) {
         if (error.status) {
@@ -145,6 +133,5 @@ async function updateEmployeeStatus(employee) {
         throw error;
     }
 }
-
 
 module.exports = EmployeesService;

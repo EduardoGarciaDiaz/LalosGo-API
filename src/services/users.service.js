@@ -172,10 +172,7 @@ const getUserLogin = async (username) => {
         const userFound = await User.findOne({ username })
 
         if (!userFound) {
-            throw {
-                status: 404,
-                message: "Usuario no encontrado"
-            };
+            return null;
         }
 
         if (userFound.client) {
@@ -200,12 +197,6 @@ const getUserLogin = async (username) => {
         };
 
     } catch (error) {
-        if (error.status) {
-            throw {
-                status: error.status,
-                message: error.message
-            }
-        }
         throw error;
     }
 };

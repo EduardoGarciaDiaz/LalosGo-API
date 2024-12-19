@@ -30,12 +30,6 @@ const createProduct = async (req, res, next) => {
             branch: productSaved  
         })
     } catch (error) {
-        console.log(error)
-        if (error.status) {
-            return res
-                .status(error.status)
-                .send({message: error.message});
-        }
         next(error)
     }
 }
