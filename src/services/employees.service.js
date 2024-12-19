@@ -7,26 +7,25 @@ const EmployeesService = {};
 EmployeesService.getAllEmployees = async function (searchQuery) {
     const filters = { employee: { $exists: true } }; 
     if (searchQuery) {
-        filters['employee.username'] = {
+        filters['fullname'] = {
             $regex: searchQuery,
             $options: 'i'
         };
     }
 
-    return await User.find(filters);
+    return await User.find(filters).select('-password');
 };
 
 EmployeesService.getEmployee = async function (id) {
     try{
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            return null;
+            const error = new Error('Empleado no encontrado');
+            error.status = 404;
+            throw error;
         }
         
-        let foundEmployee = await User.findById(id);
+        let foundEmployee = await User.findById(id).select('-password');
 
-        if(!foundEmployee){
-            return null;
-        }
         return foundEmployee;
     } catch (error) {
         if (error.status) {
@@ -50,7 +49,9 @@ EmployeesService.saveEmployee = async function (employee) {
         });
 
         if (repeatedEmployee) {
-            return null;
+            const error = new Error('El correo, username o número telefónico ya se encuentran registrados');
+            error.status = 400;
+            throw error;
         }
 
         const newUser = new User({
@@ -58,11 +59,10 @@ EmployeesService.saveEmployee = async function (employee) {
             email: employee.email,
             birthdate: employee.birthdate,
             phone: employee.phone,
-            password: bcrypt.hash(employee.password, 10),
+            password: bcrypt.hashSync(employee.password, 10),
             username: employee.username,
             status: 'Active',
             employee: {
-                username: employee.username,
                 role: employee.employee.role,
                 hiredDate: employee.employee.hiredDate,
                 branch: employee.employee.branch
@@ -76,8 +76,11 @@ EmployeesService.saveEmployee = async function (employee) {
         return savedUser;
 
     } catch (error) {
-        if (!error.status) {
-            error.status = 500;
+        if (error.status) {
+            throw {
+                status: error.status,
+                message: error.message
+            }
         }
         throw error;
     }
@@ -95,7 +98,9 @@ EmployeesService.updateEmployee = async function (id, employee, isStatusChanged)
         });
 
         if (repeatedEmployee) {
-            return null;
+            const error = new Error('El correo, username o número telefónico ya se encuentran registrados');
+            error.status = 400;
+            throw error;
         }
 
         await User.findOneAndUpdate(
@@ -109,7 +114,7 @@ EmployeesService.updateEmployee = async function (id, employee, isStatusChanged)
         }
 
         const updatedEmployee = await User.findById(id).select('-password');
-
+        return updatedEmployee;
     } catch (error) {
         if (error.status) {
             throw {
@@ -117,10 +122,7 @@ EmployeesService.updateEmployee = async function (id, employee, isStatusChanged)
                 message: error.message
             };
         }
-        throw {
-            status: 500,
-            message: "Error interno del servidor"
-        };
+        throw error;
     }
 };
 

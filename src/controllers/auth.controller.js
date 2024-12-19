@@ -22,7 +22,7 @@ self.login = async function (req, res, next) {
         let token = generateToken(data.email, data.fullname, data.role);
         res.status(200).json({
             email: data.email,
-            name: data.fullname,
+            fullname: data.fullname,
             role: data.role,
             token: token
         })

@@ -1,5 +1,7 @@
 const fs = require('fs');
 const requestIp = require('request-ip');
+const dotenv = require('dotenv');
+dotenv.config();
 
 const errorHandler = (err, req, res, next) => {
     let message = 'No se ha podido procesar la petición. Inténtelo de nuevo más tarde.';
@@ -18,8 +20,6 @@ const errorHandler = (err, req, res, next) => {
         }
     })
 
-    console.log(process.env.NODE_ENV)
-
     if (process.env.NODE_ENV === 'development') {
         message = err.message || message
 
@@ -28,6 +28,7 @@ const errorHandler = (err, req, res, next) => {
             message: message,
             stack: err.stack
         })
+        console.log(err)
     } else {
         res.status(statusCode).send({ message: message })
     }
