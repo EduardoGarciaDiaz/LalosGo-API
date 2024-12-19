@@ -1,3 +1,4 @@
+const { raw } = require('express');
 const User = require('../models/User');
 
 const postPaymentMethod = async (userId, newPaymentMethod) => {
@@ -10,7 +11,7 @@ const postPaymentMethod = async (userId, newPaymentMethod) => {
 
         if (newPaymentMethod.cardNumber) {
             const existingCard = await User.findOne({ 'paymentMethods.cardNumber': newPaymentMethod.cardNumber });
-            
+
             //TODO: Validar que la tarjeta no esté registrada a el usuario
             if (existingCard && existingCard._id.toString() == userId) {
                 console.log('El método de pago ya está registrado.');
@@ -41,7 +42,7 @@ const postPaymentMethod = async (userId, newPaymentMethod) => {
             await userFound.save();
 
             const addedPaymentMethod = userFound.client.paymentMethods[userFound.client.paymentMethods.length - 1];
-            return addedPaymentMethod; 
+            return addedPaymentMethod;
         }
     } catch (error) {
         if (error.status) {
@@ -51,7 +52,7 @@ const postPaymentMethod = async (userId, newPaymentMethod) => {
             }
         }
         throw error;
-    }   
+    }
 }
 
 const getPaymentMethods = async (userId) => {
@@ -70,7 +71,7 @@ const getPaymentMethods = async (userId) => {
         const paymentMethods = userFound.client.paymentMethods;
 
         return paymentMethods;
-        
+
     } catch (error) {
         if (error.status) {
             throw {
@@ -79,7 +80,7 @@ const getPaymentMethods = async (userId) => {
             }
         }
         throw error;
-    }   
+    }
 }
 
 const deletePaymentMethod = async (userId, paymentMethodId) => {
@@ -110,7 +111,7 @@ const deletePaymentMethod = async (userId, paymentMethodId) => {
         }
 
         userFound.client.paymentMethods.pull(paymentMethodId);
-        
+
         await userFound.save();
 
         return paymentMethodFound;
@@ -122,7 +123,7 @@ const deletePaymentMethod = async (userId, paymentMethodId) => {
             }
         }
         throw error;
-    }   
+    }
 }
 
 const updatePaymentMethod = async (userId, paymentMethodId, updatedPaymentMethod) => {
@@ -166,6 +167,42 @@ const updatePaymentMethod = async (userId, paymentMethodId, updatedPaymentMethod
     }
 }
 
+const getUserLogin = async (username) => {
+    try {
+        const userFound = await User.findOne({ username })
+
+        if (!userFound) {
+            return null;
+        }
+
+        if (userFound.client) {
+
+            return {
+                id: userFound._id.toString(),
+                fullname: userFound.fullname,
+                role: 'Cliente',
+                password: userFound.password,
+                email: userFound.email
+            };
+        } else if (userFound.employee) {
+            return {
+                id: userFound._id.toString(),
+                fullname: userFound.fullname,
+                role: userFound.employee.role,
+                password: userFound.password,
+                email: userFound.email
+            };
+        }
+        throw {
+            status: 400,
+            message: "El usuario no tiene un rol asignado"
+        };
+
+    } catch (error) {
+        throw error;
+    }
+};
+
 const createClientAccount = async (newClientAccount) => {
     try {
         const newUser = new User(newClientAccount);
@@ -184,20 +221,18 @@ const createClientAccount = async (newClientAccount) => {
 }
 
 const updateClientAccount = async (userId, updatedClientAccount) => {
-    try{
+    try {
         const userFound = await User.findById(userId);
 
         if (!userFound) {
-            throw {
-                status: 404,
-                message: "Usuario no encontrado"
-            };
+            const error = new Error('Usuario no encontrado');
+            error.status = 404;
         }
 
         userFound.set(updatedClientAccount);
         await userFound.save();
         return userFound;
-    }catch (error) {
+    } catch (error) {
         if (error.status) {
             throw {
                 status: error.status,
@@ -205,11 +240,11 @@ const updateClientAccount = async (userId, updatedClientAccount) => {
             }
         }
         throw error;
-    } 
+    }
 }
 
 const recoverPassword = async (userId, newPassword) => {
-    try{
+    try {
         const userFound = await User.findOne(userId);
 
         if (!userFound) {
@@ -219,9 +254,9 @@ const recoverPassword = async (userId, newPassword) => {
             };
         }
 
-        userFound.password.set(newPassword); 
+        userFound.password.set(newPassword);
         userFound.save();
-        return userFound; 
+        return userFound;
     } catch (error) {
         if (error.status) {
             throw {
@@ -229,17 +264,17 @@ const recoverPassword = async (userId, newPassword) => {
                 message: error.message
             }
         }
-    throw error;
+        throw error;
+    }
 }
 
-}
-
-module.exports = { 
+module.exports = {
     postPaymentMethod,
     getPaymentMethods,
     deletePaymentMethod,
-    updatePaymentMethod, 
-    createClientAccount, 
-    updateClientAccount, 
-    recoverPassword
+    updatePaymentMethod,
+    createClientAccount,
+    updateClientAccount,
+    recoverPassword,
+    getUserLogin
 }

@@ -40,7 +40,7 @@ const clientSchema = new mongoose.Schema({
             type: String,
             required: true
         }, 
-        longitute: {
+        longitude: {
             type: String, 
             required: true
         }
@@ -76,11 +76,6 @@ const clientSchema = new mongoose.Schema({
 })
 
 const employeeSchema = new mongoose.Schema({
-    username: {
-        type: String,
-        required: false,
-        index: true,
-    },
     role: {
         type: String,
         enum:['Manager', 'Delivery Person', 'Sales Executive' ],
@@ -99,6 +94,11 @@ const employeeSchema = new mongoose.Schema({
 
 
 userSchema = new mongoose.Schema({
+    username: {
+        type: String,
+        required: false,
+        index: true,
+    },
     fullname: {
         type: String,
         required: true
@@ -106,6 +106,10 @@ userSchema = new mongoose.Schema({
     birthdate: {
         type: Date,
         required: true,
+        validate: {
+            validator: (value) => value <= new Date(),
+            message: 'Birthdate cannot be in the future.'
+        }
     },
     phone: {
         type: Number,
