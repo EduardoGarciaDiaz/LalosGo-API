@@ -1,60 +1,118 @@
 const ProductsService = require('../services/products.service');
-const ProductService = require('../services/products.service')
+const ProductService = require('../services/products.service');
+require('dotenv').config();
+const multer = require('multer');
+const cloudinary = require('../cloudinary');
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage }).single('image');
 
 
 const createProduct = async (req, res, next) => {
     try {
-        let {barCode, name, description, unitPrice, expireDate, weight, productStatus, unitMeasure, category} = req.body
-        let {branches} = req.body
+        let { barCode, name, description, unitPrice, expireDate, image, weight, productStatus, unitMeasure, category } = req.body;
+        let { branches } = req.body;
         let newProduct = {
             barCode,
             name,
             description,
             unitPrice,
-            expireDate,            
+            expireDate,
+            image,
             weight,
             productStatus,
             unitMeasure,
             category
-        }
-        let productSaved = await ProductService.saveNewProduct(newProduct)
-        if(productSaved){
-            await ProductService.saveProductInBranch(branches, productSaved)
+        };
+
+        let productSaved = await ProductService.saveNewProduct(newProduct);
+        if (productSaved) {
+            await ProductService.saveProductInBranch(branches, productSaved);
             return res.status(201).send({
-                message:"Producto creado exitosamente.",
-                branch: productSaved  
-            })
+                message: "Producto creado exitosamente.",
+                branch: productSaved
+            });
         }
         return res.status(400).send({
-            message:"Ocurrio un probema al guardar el producto, contacte a su prestador del servicio.",
-            branch: productSaved  
-        })
+            message: "Ocurrió un problema al guardar el producto, contacte a su prestador del servicio.",
+            product: productSaved
+        });
     } catch (error) {
-        console.log(error)
+        console.log(error);
         if (error.status) {
-            return res
-                .status(error.status)
-                .send({message: error.message});
+            return res.status(error.status).send({ message: error.message });
         }
-        next(error)
+        next(error);
     }
 }
 
+const updateProductImage = async (req, res, next) => {
+    
+    try {
+        let productId = req.params.productId;
+        upload(req, res, async (err) => {
+            if (err) {
+                console.log("Error con Multer:", err);
+                return next({ status: 500, message: "Error al subir la imagen, puede intentarlo desde el apartado -Edicion Producto-"  });
+            }
+            const imageFile = req.file;
+
+            if (!imageFile) {
+                return next({ status: 400, message: "No se ha proporcionado una imagen, puede intentarlo desde el apartado -Edicion Producto-" });
+            }
+            
+            try {
+                const result = await new Promise((resolve, reject) => {
+                    cloudinary.uploader.upload_stream(
+                        { resource_type: 'auto' },
+                        (error, result) => {
+                            if (error) {
+                                reject(error);
+                            }
+                            resolve(result);
+                        }
+                    ).end(imageFile.buffer);
+                });
+                
+                
+                const imageUrl = result.secure_url;
+                const imageId = result.asset_id;
+
+                let product = await ProductService.saveProductImage(productId, imageUrl);
+                if (!product) {
+                    return next({ status: 400, message: "Error al actualizar el producto en la base de datos, puede intentarlo desde el apartado -Edicion Producto-" });
+                }
+
+                return res.status(200).send({
+                    message: "Imagen guardada correctamente",
+                    product: product
+                });
+            } catch (error) {
+                return next({ status: 500, message: "Error al procesar la imagen, puede intentarlo desde el apartado -Edicion Producto-", error: error.message });
+            }
+        });
+    } catch (error) {
+        if (error.status) {
+            return res.status(error.status).send({ message: error.message });
+        }
+        next(error);
+    }
+};
+
+
 const getAllProducts = async (req, res, next) => {
     try {
-        // TODO
+        // Implementar lógica para obtener productos (si es necesario)
         // const result = await ProductsService.getAllProducts();
     } catch (error) {
         if (error.status) {
-            return res
-                .status(error.status)
-                .send({message: error.message});
+            return res.status(error.status).send({ message: error.message });
         }
-
-        next(error)
+        next(error);
     }
 }
 
 module.exports = {
-    createProduct
+    createProduct,
+    updateProductImage
 }

@@ -26,6 +26,35 @@ const saveNewProduct = async(newProduct) => {
     }
 }
 
+const saveProductImage = async(productId, imageUrl, imageAssetId)=>{
+    try {
+        let foundProduct = await ProductSchema.findById(productId)
+        if(!foundProduct){
+            throw{
+                status: 404,
+                message: "El producto no se encuentra guardado, agreguelo."
+            }
+        }
+        let productToEdit = await ProductSchema.findByIdAndUpdate(
+            productId, 
+            {
+                $set:{
+                    image: imageUrl,
+                    imageId: imageAssetId
+                }
+            },
+            { new: true, useFindAndModify: false }
+        )
+        return productToEdit
+    } catch (error) {
+        if (error.status) {
+            throw {
+                status: error.status,
+                message: error.message,
+            };
+        } 
+    }
+}
 
 
 const saveProductInBranch = async (branches, productToAdd) => {
@@ -96,5 +125,6 @@ const getAllProducts = async () => {
 
 module.exports = {
     saveNewProduct,
-    saveProductInBranch
+    saveProductInBranch,
+    saveProductImage
 }
