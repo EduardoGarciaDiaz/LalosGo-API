@@ -23,10 +23,6 @@ const clientSchema = new mongoose.Schema({
             type: String,
             required: true
         },
-        municipality : {
-            type: String,
-            required: true
-        },
         federalEntity: {
             type: String,
             required: true
@@ -40,8 +36,12 @@ const clientSchema = new mongoose.Schema({
             enum: ['Point'],
             required: true
         },
-        coordinates: {
-            type: [Number],
+        latitude: {
+            type: String,
+            required: true
+        }, 
+        longitude: {
+            type: String, 
             required: true
         }
     }],
@@ -76,11 +76,6 @@ const clientSchema = new mongoose.Schema({
 })
 
 const employeeSchema = new mongoose.Schema({
-    username: {
-        type: String,
-        required: true,
-        unique: true
-    },
     role: {
         type: String,
         enum:['Manager', 'Delivery Person', 'Sales Executive' ],
@@ -99,40 +94,49 @@ const employeeSchema = new mongoose.Schema({
 
 
 userSchema = new mongoose.Schema({
+    username: {
+        type: String,
+        required: false,
+        index: true,
+    },
     fullname: {
         type: String,
         required: true
     },
     birthdate: {
         type: Date,
-        required: true
+        required: true,
+        validate: {
+            validator: (value) => value <= new Date(),
+            message: 'Birthdate cannot be in the future.'
+        }
     },
     phone: {
         type: Number,
         required: true,
         unique: true,
     },
-    password: {
-        type: String,
-        required: true,
-    },
-    username: {
+    email: {
         type: String,
         required: false,
-        indexe: true
+        unique: true,
+    },
+    password: {
+        type: String,
+        required: true
     },   
     status: {
         type: String,
         enum:['Active', 'Inactive'],
-        required: true
+        required: true,
     },
     client: {
         type: clientSchema,
-        required: false
+        required: false,
     },
     employee: {
         type: employeeSchema,
-        required: false
+        required: false,
     }    
 },
 {

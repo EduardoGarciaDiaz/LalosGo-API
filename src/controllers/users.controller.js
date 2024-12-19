@@ -1,5 +1,6 @@
 const UserService = require('../services/users.service');
 const User = require('../models/User');
+const bcrypt = require('bcrypt');
 
 const postPaymentMethod = async (req, res, next) => {
     try {
@@ -129,9 +130,118 @@ const updatePaymentMethod = async (req, res, next) => {
     }
 }
 
+const createClientAccount = async (req, res, next) => {
+    try{
+        const { username,fullname, birthdate, phone, email, password, client} = req.body;
+
+        const existinguser = await userService.findUserByEmailOrPhoneNumber(email, phone, username);
+        
+        if (existinguser) {
+            return res.status(400).send({message: "Error al registrar los datos del usuario"});
+        }
+
+        const newClientAccount = {
+            username,
+            fullname,
+            birthdate,
+            phone,
+            email,
+            password,
+            status: 'Active', 
+            client,
+        }
+
+        const result = await UserService.createClientAccount(newClientAccount);
+
+        return res.status(201).send({
+            message: "Cuenta de cliente creada correctamente",
+            newClientAccount: result
+        });
+    }catch (error) {
+        if (error.status) {
+            return res
+                .status(error.status)
+                .send({message: error.message});
+        }
+        next(error)
+    }
+}
+
+const findUserByEmailOrPhoneNumber = async (email, phone) => {
+    const user = UserModel.findOne({
+        $or: [{email}, {phone}, {username}]
+    });
+    return user;
+}
+
+const updateClientAccount = async (req, res, next) => {
+    try{
+        const { fullname, birthdate, phone, email, password} = req.body;
+        const userId = req.params.userId;
+
+        const newClientAccount = {
+            fullname,
+            birthdate,
+            phone,
+            email,
+            password,
+            status: 'Active', 
+        }
+        const result = await UserService.updateClientAccount(userId, newClientAccount);
+        return res.status(200).send({
+            message: "Cuenta de cliente creada correctamente",
+            newClientAccount: result
+        });
+    }catch (error) {
+        next(error)
+    }
+}
+
+const recoverPassword = async (req, res, next) => {
+    try{
+        const { newPassword, confirmPassword} = req.body;
+        const userId = req.params.userId;
+
+        if (!userId || userId === null || userId === '') {
+            return res.status(400).send({error: `El id del usuario '${userId}' viene nulo o vacío`})
+        }
+
+        if (!newPassword?.trim() || !confirmPassword?.trim()) {
+            return res.status(400).send({
+                message: "Los campos 'newPassword' y 'confirmPassword' no pueden estar vacíos"
+            });
+        }
+
+        if (newPassword !== confirmPassword) {
+            return res.status(400).send({
+                message: "Las contraseñas no coinciden"
+            });
+        }
+
+        const result = await UserService.recoverPassword(userId, newPassword);
+
+        return res.status(200).send({
+            message: "La contraseña ha sido actualizada correctamente",
+            result: result
+        });
+
+    }catch (error) {
+        if (error.status) {
+            return res
+                .status(error.status)
+                .send({message: error.message});
+        }
+        next(error)
+    }
+
+}
+
 module.exports = {
     postPaymentMethod,
     getPaymentMethods,
     deletePaymentMethod,
-    updatePaymentMethod
+    updatePaymentMethod, 
+    createClientAccount, 
+    updateClientAccount, 
+    recoverPassword
 }

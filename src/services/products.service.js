@@ -67,13 +67,8 @@ const saveProductInBranch = async (branches, productToAdd) => {
                 status: error.status,
                 message: error.message,
             };
-        } else {
-            console.error("Error interno:", error);
-            throw {
-                status: 500,
-                message: "Ocurrió un error interno al actualizar las sucursales.",
-            };
         }
+        throw error;
     }
 };
 
