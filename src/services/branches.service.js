@@ -84,6 +84,10 @@ const updateBranchProductsQuantity = async(branchToUpdate, productsToAdd) => {
     }
 }
 
+
+
+
+
 async function updateBranchStatuss(branchToChangeStatus) {
     //Desactivar empleador de la empresa.
 }

@@ -4,15 +4,13 @@ const model = mongoose.model
 orderSchema = new mongoose.Schema({
     orderNumber: {
         type: Number,
-        required: true,
         unique: true
     },
     orderDate: {
-        type: Date,
-        required: true
+        type: Date
     },
     deliveryDate: {
-        type: Date,
+        type: Date
     },
     totalPrice: {
         type: Number,
@@ -51,8 +49,7 @@ orderSchema = new mongoose.Schema({
         default: 'reserved' 
     },
     paymentMethod: {
-        type: String,
-        required: true
+        type: String
     }
 },
 {
