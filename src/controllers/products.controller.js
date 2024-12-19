@@ -30,7 +30,7 @@ const createProduct = async (req, res, next) => {
             await ProductService.saveProductInBranch(branches, productSaved);
             return res.status(201).send({
                 message: "Producto creado exitosamente.",
-                branch: productSaved
+                product: productSaved
             });
         }
         return res.status(400).send({
@@ -78,7 +78,7 @@ const updateProductImage = async (req, res, next) => {
                 const imageUrl = result.secure_url;
                 const imageId = result.asset_id;
 
-                let product = await ProductService.saveProductImage(productId, imageUrl);
+                let product = await ProductService.saveProductImage(productId, imageUrl, imageId);
                 if (!product) {
                     return next({ status: 400, message: "Error al actualizar el producto en la base de datos, puede intentarlo desde el apartado -Edicion Producto-" });
                 }
