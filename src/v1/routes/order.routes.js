@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const authorize = require('../../middlewares/auth.middleware');
 const orders = require('../../controllers/orders.controller.js');
 
 router.get('/', authorize('Manager,Customer,Delivery Person, Sales Executive'), orders.getAll);
