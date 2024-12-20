@@ -171,7 +171,7 @@ const getAllOrders = async function () {
 
 const getAllOrdersByCustomer = async function (customerId) {
     try {
-        const orders = await Order.find({ _id: customerId });
+        const orders = await Order.find({ customer: customerId });
         return orders;
     }
     catch (error) {
@@ -181,7 +181,7 @@ const getAllOrdersByCustomer = async function (customerId) {
 
 const getAllOrdersByDeliveryPerson = async function (deliveryPersonId) {
     try {
-        const orders = await Order.find({ _id: deliveryPersonId });
+        const orders = await Order.find({ deliveryPerson: deliveryPersonId });
         return orders;
     }
     catch (error) {
@@ -189,9 +189,56 @@ const getAllOrdersByDeliveryPerson = async function (deliveryPersonId) {
     }
 }
 
-    module.exports = {
-        cartToOrder,
-        getAllOrders,
-        getAllOrdersByCustomer,
-        getAllOrdersByDeliveryPerson
+const getOrderByCustomer = async function (customerId, orderId) {
+    try {
+        const order = await Order.findOne({ customer: customerId, _id: orderId });
+
+        if (!order) {
+            const error = new Error('Orden no encontrada');
+            error.status = 404;
+        }
+        return order;
+
+    } catch (error) {
+        throw error;
     }
+}
+
+const getOrderByDeliveryPerson = async function (deliveryPersonId, orderId) {
+    try {
+        const order = await Order.findOne({ deliveryPerson: deliveryPersonId, _id: orderId });
+
+        if (!order) {
+            const error = new Error('Orden no encontrada');
+            error.status = 404;
+        }
+        return order;
+    } catch (error) {
+        throw error;
+    }
+}
+
+const getOrder = async function (orderId) {
+    try {
+        const order = await Order.findById(orderId);
+
+        if (!order) {
+            const error = new Error('Orden no encontrada');
+            error.status = 404;
+        }
+        return order;
+    }
+    catch (error) {
+        throw error;
+    }
+}
+
+module.exports = {
+    cartToOrder,
+    getAllOrders,
+    getAllOrdersByCustomer,
+    getAllOrdersByDeliveryPerson,
+    getOrderByCustomer,
+    getOrderByDeliveryPerson,
+    getOrder
+}
