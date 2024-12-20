@@ -118,8 +118,8 @@ self.updateStatus = async (req, res, next) => {
         const token = authHeader.split(' ')[1];
         const decodedToken = jwt.verify(token, jwtSecret);
         const role = decodedToken.role;
-        const statusForDeliveryPerson = ['in transit', 'delivered'];
-        const statusForSalesExecutive = ['approved', 'canceled'];
+        const statusForDeliveryPerson = ['in transit', 'delivered', 'not delivered'];
+        const statusForSalesExecutive = ['approved', 'denied'];
         const statusForCustomer = ['canceled'];
         const order = await OrderService.getOrder(orderId);
         if (!order) {
@@ -128,11 +128,11 @@ self.updateStatus = async (req, res, next) => {
 
         if (role === 'Delivery Person') {
             if (!statusForDeliveryPerson.includes(status)) {
-                return res.status(403).json({ message: "Repartidor solo puede establecer el estado en 'en tránsito' o 'entregado'." });
+                return res.status(403).json({ message: "Repartidor solo puede establecer el estado en 'en tránsito' o 'entregado' o 'no entregado'." });
             }
         } else if (role === 'Sales Executive') {
             if (!statusForSalesExecutive.includes(status)) {
-                return res.status(403).json({ message: "El ejecutivo de ventas solo puede establecer el estado en 'aprobado' o 'cancelado'." });
+                return res.status(403).json({ message: "El ejecutivo de ventas solo puede establecer el estado en 'aprobado' o 'denegado'." });
             }
         } else if (role === 'Customer') {
             if (!statusForCustomer.includes(status)) {
@@ -145,10 +145,8 @@ self.updateStatus = async (req, res, next) => {
             return res.status(403).json({ message: "Rol no permitido para cambiar el estado de la orden." });
         }
 
-        order.status = status;
-        await order.save();
-
-        return res.status(200).json({ message: "Order status updated successfully", order });
+        OrderService.updateStatus(orderId, status);
+        return res.status(200).json({ message: "Estado de la orden actualizado."}, order);
 
     } catch (error) {
         next(error);

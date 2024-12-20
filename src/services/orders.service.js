@@ -233,6 +233,17 @@ const getOrder = async function (orderId) {
     }
 }
 
+const updateStatus = async function (orderId, status) {
+    try {
+        await User.findOneAndUpdate({ _id: orderId }, { status: status });
+        const updatedOrder = await Order.findById(orderId);
+        return updatedOrder;
+    }
+    catch (error) {
+        throw error;
+    }
+}
+
 module.exports = {
     cartToOrder,
     getAllOrders,
@@ -240,5 +251,6 @@ module.exports = {
     getAllOrdersByDeliveryPerson,
     getOrderByCustomer,
     getOrderByDeliveryPerson,
-    getOrder
+    getOrder,
+    updateStatus
 }
