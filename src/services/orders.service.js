@@ -10,19 +10,19 @@ const cartToOrder = async (orderDetails) => {
                 message: "Faltan datos"
             };
         }
-    
-        const order = await Order.findOne({ 
+
+        const order = await Order.findOne({
             _id: orderDetails.orderId,
-            customer: orderDetails.customer 
+            customer: orderDetails.customer
         }).exec();
-    
+
         if (!order) {
             throw {
                 status: 404,
                 message: "Carrito no encontrado o no pertenece al usuario"
             };
         }
-    
+
         order.set({
             orderNumber: orderDetails.orderNumber,
             orderDate: orderDetails.orderDate,
@@ -31,7 +31,7 @@ const cartToOrder = async (orderDetails) => {
             statusOrder: orderDetails.statusOrder,
             paymentMethod: orderDetails.paymentMethod
         });
-    
+
         return await reserveCartProducts(order);
 
     } catch (error) {
@@ -126,7 +126,7 @@ async function reserveCartProducts(order) {
         }
 
         await order.save();
-        
+
         return await Order.findById(order._id)
             .populate('orderProducts.product')
             .exec();
@@ -160,6 +160,97 @@ async function rollbackUpdates(branchId, productUpdates) {
     }
 }
 
+const getAllOrders = async function () {
+    try {
+        const orders = await Order.find({});
+        return orders;
+    } catch (error) {
+        throw error;
+    }
+}
+
+const getAllOrdersByCustomer = async function (customerId) {
+    try {
+        const orders = await Order.find({ customer: customerId });
+        return orders;
+    }
+    catch (error) {
+        throw error;
+    }
+}
+
+const getAllOrdersByDeliveryPerson = async function (deliveryPersonId) {
+    try {
+        const orders = await Order.find({ deliveryPerson: deliveryPersonId });
+        return orders;
+    }
+    catch (error) {
+        throw error;
+    }
+}
+
+const getOrderByCustomer = async function (customerId, orderId) {
+    try {
+        const order = await Order.findOne({ customer: customerId, _id: orderId });
+
+        if (!order) {
+            const error = new Error('Orden no encontrada');
+            error.status = 404;
+        }
+        return order;
+
+    } catch (error) {
+        throw error;
+    }
+}
+
+const getOrderByDeliveryPerson = async function (deliveryPersonId, orderId) {
+    try {
+        const order = await Order.findOne({ deliveryPerson: deliveryPersonId, _id: orderId });
+
+        if (!order) {
+            const error = new Error('Orden no encontrada');
+            error.status = 404;
+        }
+        return order;
+    } catch (error) {
+        throw error;
+    }
+}
+
+const getOrder = async function (orderId) {
+    try {
+        const order = await Order.findById(orderId);
+
+        if (!order) {
+            const error = new Error('Orden no encontrada');
+            error.status = 404;
+        }
+        return order;
+    }
+    catch (error) {
+        throw error;
+    }
+}
+
+const updateStatus = async function (orderId, status) {
+    try {
+        await User.findOneAndUpdate({ _id: orderId }, { status: status });
+        const updatedOrder = await Order.findById(orderId);
+        return updatedOrder;
+    }
+    catch (error) {
+        throw error;
+    }
+}
+
 module.exports = {
-    cartToOrder
+    cartToOrder,
+    getAllOrders,
+    getAllOrdersByCustomer,
+    getAllOrdersByDeliveryPerson,
+    getOrderByCustomer,
+    getOrderByDeliveryPerson,
+    getOrder,
+    updateStatus
 }
