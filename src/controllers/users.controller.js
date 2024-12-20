@@ -140,13 +140,16 @@ const createClientAccount = async (req, res, next) => {
             return res.status(400).send({message: "Error al registrar los datos del usuario"});
         }
 
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds); 
+        
         const newClientAccount = {
             username,
             fullname,
             birthdate,
             phone,
             email,
-            password,
+            password: hashedPassword,
             status: 'Active', 
             client,
         }
