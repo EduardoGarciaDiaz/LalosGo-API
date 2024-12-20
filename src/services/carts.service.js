@@ -4,6 +4,103 @@ const Branch = require('../models/Branch');
 const CART_STATUS = 'reserved';
 const SHIPPING_COST = 50;
 
+const saveProductInCart = async(userId, productForCart, branchId) => {
+    try {
+        let existingCart = await Order.findOne({customer: userId, statusOrder: CART_STATUS})
+        let result
+        if(existingCart){
+            if(existingCart.branch != branchId){
+                throw {
+                    status: 400,
+                    message: "No se puede agregar el producto debido a que el carrito no pertence a esa sucursal."
+                }
+            }
+
+            const existingProduct = existingCart.orderProducts.find((element) => element.product.toString() === productForCart._id.toString())
+            if(existingProduct){
+                let productDemand = Number(existingProduct.quantity)+Number(productForCart.quantity)
+                let stockAvailabie = await isStockAvailable({productId:productForCart._id, quantity: productDemand, branchId: branchId})
+                if(!stockAvailabie.hasStock){
+                    throw {
+                        status: 400,
+                        message: `No se puede agregar el producto debido a que se alcanzó el limite: ${stockAvailabie.maxStock}.`
+                    }
+                }                 
+                 existingProduct.quantity += Number(productForCart.quantity);
+                 existingProduct.price += Number(productForCart.price);
+                 existingCart.totalPrice += Number(productForCart.price);
+                 result = await existingCart.save();
+            }else{
+                let stockAvailabie = await isStockAvailable({productId:productForCart._id, quantity: productForCart.quantity, branchId: branchId})
+                if(!stockAvailabie.hasStock){
+                    throw {
+                        status: 400,
+                        message: `No se puede agregar el producto debido a que se alcanzó el limite: ${stockAvailabie.maxStock}.`
+                    }
+                } 
+                existingCart.orderProducts.push({
+                    product: productForCart._id,
+                    quantity: Number(productForCart.quantity),
+                    price: Number(productForCart.price)
+                });            
+                existingCart.totalPrice += productForCart.price;
+                result = await existingCart.save();
+            }            
+            
+        }else{
+            let stockAvailabie = await isStockAvailable({productId:productForCart._id, quantity: productForCart.quantity, branchId: branchId})
+            if(!stockAvailabie.hasStock){
+                throw {
+                    status: 400,
+                    message: `No se puede agregar el producto debido a que se alcanzó el limite: ${stockAvailabie.maxStock}.`
+                }
+            } 
+           let newCart = new Order({
+                orderNumber: generateOrderNumber(userId),
+                totalPrice: Number(productForCart.price),
+                branch: branchId,
+                orderProducts :[{
+                    product: productForCart._id,
+                    quantity: Number(productForCart.quantity),
+                    price: Number(productForCart.price)
+                }],                
+                customer: userId,
+                statusOrder: CART_STATUS
+           })
+           result = await newCart.save()
+        }
+        return result
+    } catch (error) {
+        if (error.status) {
+            throw {
+                status: error.status,
+                message: error.message
+            }
+        }
+        throw error;
+    }
+}
+
+
+function generateOrderNumber(id) {
+    const fecha = new Date();
+    const fechaFormato = 
+        fecha.getFullYear().toString() + 
+        (fecha.getMonth() + 1).toString().padStart(2, '0') + 
+        fecha.getDate().toString().padStart(2, '0') +
+        fecha.getHours().toString().padStart(2, '0') +
+        fecha.getMinutes().toString().padStart(2, '0') +
+        fecha.getSeconds().toString().padStart(2, '0');
+    const numericId = id.substring(1,6).replace(/\D/g, ''); 
+    const orderNumber = Number(`${fechaFormato}${numericId}`);
+    
+    return orderNumber;
+}
+
+
+
+
+
 const getCart = async (userId, status) => {
     try {
         if (status !== undefined && status === CART_STATUS) {
@@ -193,5 +290,6 @@ module.exports = {
     getCart,
     deleteCart,
     updateCartQuantities,
-    getCartPrice
+    getCartPrice,
+    saveProductInCart
 }

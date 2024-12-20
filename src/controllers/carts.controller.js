@@ -1,6 +1,26 @@
 const CartService = require('../services/carts.service.js');
 const CART_STATUS = 'reserved';
 
+
+const creteCart = async (req,res,next) => {
+    try {
+        let {userId, productForCart, branchId} = req.body
+        let operationResult = await CartService.saveProductInCart(userId, productForCart, branchId)
+        
+        return res.status(200).send({
+            message: "Producto agregado correctamente al carrito",
+            cart: operationResult
+        });
+    } catch (error) {
+        if (error.status) {
+            return res
+                .status(error.status)
+                .send({message: error.message});
+        }
+        next(error)
+    }
+}
+
 const getCart = async (req, res, next) => { 
     try {
         const userId = req.params.userId;
@@ -131,6 +151,7 @@ const getCartPrice = async (req, res, next) => {
 }
 
 module.exports = {
+    creteCart,
     getCart,
     deleteCart,
     updateCartQuantities,
