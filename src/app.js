@@ -1,4 +1,7 @@
-const Express = require('express');
-const App = Express();
+const express = require('express');
+const app = express();
+app.disable("x-powered-by");
+app.use(express.json())
+app.use(express.urlencoded({ extended: false }))
 
-module.exports = App;
+module.exports = app;
