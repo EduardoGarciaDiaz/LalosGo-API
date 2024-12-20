@@ -1,18 +1,20 @@
 const fs = require('fs');
 const requestIp = require('request-ip');
+const dotenv = require('dotenv');
+dotenv.config();
 
 const errorHandler = (err, req, res, next) => {
     let message = 'No se ha podido procesar la petición. Inténtelo de nuevo más tarde.';
     const statusCode = err.status || 500;
     const ip = requestIp.getClientIp(req);
 
-    let user = 'Anónimo';
+    let email = 'Anónimo';
 
     if (req.decodedToken) {
-        user = req.decodedToken.username;
+        email = req.decodedToken.email;
     }
 
-    fs.appendFile('logs/error.log', new Date() + ` - ${statusCode} - ${ip} - ${user} - ${(err.message || message)}\n`, (err) => {
+    fs.appendFile('logs/error.log', new Date() + ` - ${statusCode} - ${ip} - ${email} - ${(err.message || message)}\n`, (err) => {
         if (err) {
             console.log(err)
         }
@@ -26,9 +28,11 @@ const errorHandler = (err, req, res, next) => {
             message: message,
             stack: err.stack
         })
+        
+        console.log(err)
     } else {
         res.status(statusCode).send({ message: message })
     }
 }
 
-module.exports = errorHandler
+module.exports = errorHandler;

@@ -1,29 +1,36 @@
 const mongoose = require('mongoose');
 const User = require('../models/User');
+const bcrypt = require('bcrypt');
 
 const EmployeesService = {};
 
 EmployeesService.getAllEmployees = async function (searchQuery) {
-    const filters = { employee: { $exists: true } }; 
-    if (searchQuery) {
-        filters['employee.username'] = {
-            $regex: searchQuery,
-            $options: 'i'
-        };
-    }
+    try {
 
-    return await User.find(filters);
+        const filters = { employee: { $exists: true } };
+        if (searchQuery) {
+            filters['fullname'] = {
+                $regex: searchQuery,
+                $options: 'i'
+            };
+        }
+
+        return await User.find(filters).select('-password');
+    } catch (error) {
+        throw error;
+    }
 };
 
 EmployeesService.getEmployee = async function (id) {
-    try{
-        let foundEmployee = await User.findById(id);
-        if(!foundEmployee){
-            throw {
-                status: 404,
-                message: "El empleado que buscas no existe"
-            }
+    try {
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            const error = new Error('Empleado no encontrado');
+            error.status = 404;
+            throw error;
         }
+
+        let foundEmployee = await User.findById(id).select('-password');
+
         return foundEmployee;
     } catch (error) {
         if (error.status) {
@@ -38,51 +45,81 @@ EmployeesService.getEmployee = async function (id) {
 
 EmployeesService.saveEmployee = async function (employee) {
     try {
-        const repeatedEmployee = await User.findOne({ 'employee.username': employee.username });
+        const repeatedEmployee = await User.findOne({
+            $or: [
+                { username: employee.username },
+                { email: employee.email },
+                { phone: employee.phone }
+            ]
+        });
+
         if (repeatedEmployee) {
-            throw {
-                status: 400,
-                message: "El empleado ya se encuentra registrado"
-            };
+            const error = new Error('El correo, username o número telefónico ya se encuentran registrados');
+            error.status = 400;
+            throw error;
         }
 
         const newUser = new User({
             fullname: employee.fullname,
+            email: employee.email,
             birthdate: employee.birthdate,
             phone: employee.phone,
-            password: employee.password,
+            password: bcrypt.hashSync(employee.password, 10),
             username: employee.username,
             status: 'Active',
             employee: {
-                username: employee.username,
                 role: employee.employee.role,
                 hiredDate: employee.employee.hiredDate,
                 branch: employee.employee.branch
             }
         });
 
-        return await newUser.save();
+        await newUser.save();
+
+        const savedUser = await User.findById(newUser._id).select('-password');
+
+        return savedUser;
+
     } catch (error) {
+        if (error.status) {
+            throw {
+                status: error.status,
+                message: error.message
+            }
+        }
         throw error;
     }
 };
 
-EmployeesService.updateEmployee = async function (id, employee, isStatusChanged){
+EmployeesService.updateEmployee = async function (id, employee, isStatusChanged) {
     try {
-        let foundEmployee = await User.findById(id);
-        if (!foundEmployee) {
-            throw {
-                status: 404,
-                message: "El empleado que quieres editar no existe"
-            };
+        const repeatedEmployee = await User.findOne({
+            $or: [
+                { username: employee.username },
+                { email: employee.email },
+                { phone: employee.phone }
+            ],
+            _id: { $ne: id }
+        });
+
+        if (repeatedEmployee) {
+            const error = new Error('El correo, username o número telefónico ya se encuentran registrados');
+            error.status = 400;
+            throw error;
         }
 
-        let updatedEmployee = await User.findOneAndUpdate({ _id: id }, { $set: employee }, { new: true });
-        foundEmployee = await User.findById(updatedEmployee._id);
+        await User.findOneAndUpdate(
+            { _id: id },
+            { $set: employee },
+            { new: true }
+        );
+
         if (isStatusChanged) {
-            await updateEmployeeStatus(foundEmployee);
+            await updateEmployeeStatus(updatedEmployee);
         }
-        return foundEmployee;
+
+        const updatedEmployee = await User.findById(id).select('-password');
+        return updatedEmployee;
     } catch (error) {
         if (error.status) {
             throw {
@@ -103,6 +140,5 @@ async function updateEmployeeStatus(employee) {
         throw error;
     }
 }
-
 
 module.exports = EmployeesService;

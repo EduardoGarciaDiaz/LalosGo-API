@@ -1,5 +1,6 @@
 const UserService = require('../services/users.service');
 const User = require('../models/User');
+const bcrypt = require('bcrypt');
 
 const postPaymentMethod = async (req, res, next) => {
     try {
@@ -185,12 +186,6 @@ const updateClientAccount = async (req, res, next) => {
             newClientAccount: result
         });
     }catch (error) {
-        console.log("Entró al catch " + error);
-        if (error.status) {
-            return res
-                .status(error.status)
-                .send({message: error.message});
-        }
         next(error)
     }
 }

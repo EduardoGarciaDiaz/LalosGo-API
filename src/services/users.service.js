@@ -172,22 +172,21 @@ const getUserLogin = async (username) => {
         const userFound = await User.findOne({ username })
 
         if (!userFound) {
-            throw {
-                status: 404,
-                message: "Usuario no encontrado"
-            };
+            return null;
         }
 
         if (userFound.client) {
 
             return {
+                id: userFound._id.toString(),
                 fullname: userFound.fullname,
-                role: 'Cliente',
+                role: 'Customer',
                 password: userFound.password,
                 email: userFound.email
             };
         } else if (userFound.employee) {
             return {
+                id: userFound._id.toString(),
                 fullname: userFound.fullname,
                 role: userFound.employee.role,
                 password: userFound.password,
@@ -200,12 +199,6 @@ const getUserLogin = async (username) => {
         };
 
     } catch (error) {
-        if (error.status) {
-            throw {
-                status: error.status,
-                message: error.message
-            }
-        }
         throw error;
     }
 };
@@ -251,10 +244,8 @@ const updateClientAccount = async (userId, updatedClientAccount) => {
         const userFound = await User.findById(userId);
 
         if (!userFound) {
-            throw {
-                status: 404,
-                message: "Usuario no encontrado"
-            };
+            const error = new Error('Usuario no encontrado');
+            error.status = 404;
         }
 
         userFound.set(updatedClientAccount);

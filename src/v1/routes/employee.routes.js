@@ -6,8 +6,8 @@ router.get('/', authorize('Manager'), employees.getAll);
 
 router.get('/:id', authorize('Manager'), employees.get);
 
-router.post('/', employees.create);
+router.post('/', authorize('Manager'), employees.create);
 
-router.put('/:id', employees.update);
+router.put('/:id', authorize('Manager'), employees.update);
 
 module.exports = router;

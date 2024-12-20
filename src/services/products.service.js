@@ -26,6 +26,35 @@ const saveNewProduct = async(newProduct) => {
     }
 }
 
+const saveProductImage = async(productId, imageUrl, imageAssetId)=>{
+    try {
+        let foundProduct = await ProductSchema.findById(productId)
+        if(!foundProduct){
+            throw{
+                status: 404,
+                message: "El producto no se encuentra guardado, agreguelo."
+            }
+        }
+        let productToEdit = await ProductSchema.findByIdAndUpdate(
+            productId, 
+            {
+                $set:{
+                    image: imageUrl,
+                    imageId: imageAssetId
+                }
+            },
+            { new: true, useFindAndModify: false }
+        )
+        return productToEdit
+    } catch (error) {
+        if (error.status) {
+            throw {
+                status: error.status,
+                message: error.message,
+            };
+        } 
+    }
+}
 
 
 const saveProductInBranch = async (branches, productToAdd) => {
@@ -67,13 +96,8 @@ const saveProductInBranch = async (branches, productToAdd) => {
                 status: error.status,
                 message: error.message,
             };
-        } else {
-            console.error("Error interno:", error);
-            throw {
-                status: 500,
-                message: "Ocurrió un error interno al actualizar las sucursales.",
-            };
         }
+        throw error;
     }
 };
 
@@ -94,7 +118,41 @@ const getAllProducts = async () => {
 }
 
 
+const consultBranchProducts = async(branchId) => {
+    try {
+        let  foundBranches  = await BranchSchema.findById(branchId).populate({
+            path:'branchProducts.product',
+            populate: {
+                path: 'category',
+                model: 'categories'
+            }
+        })
+        
+        if (!foundBranches || foundBranches.length === 0) {
+            throw {
+                status: 404,
+                message: "No se encontraron sucursales registradas"
+            }
+        }
+
+        return foundBranches;
+
+    } catch (error) {
+        if (error.status) {
+            throw {
+                status: error.status,
+                message: error.message
+            }
+        }
+        throw error
+    }
+}
+
+
+
 module.exports = {
     saveNewProduct,
-    saveProductInBranch
+    saveProductInBranch,
+    saveProductImage,
+    consultBranchProducts
 }
