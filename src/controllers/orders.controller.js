@@ -1,12 +1,18 @@
 const OrderService = require('../services/orders.service.js');
 const CartService = require('../services/carts.service.js');
+const dotenv = require('dotenv');
+dotenv.config();
+const jwt = require('jsonwebtoken');
+const jwtSecret = process.env.JWT_SECRET;
 
-const cartToOrder = async (req, res, next) => {
+let self = {}
+
+self.cartToOrder = async (req, res, next) => {
     try {
         const orderId = req.params.orderId;
         const status = req.query.status;
         let defaultOrderStatus = 'pending';
-        const { customer, branch, paymentMethod, orderProducts} = req.body;
+        const { customer, branch, paymentMethod, orderProducts } = req.body;
 
         if (status !== 'reserved') {
             throw {
@@ -49,12 +55,104 @@ const cartToOrder = async (req, res, next) => {
         if (error.status) {
             return res
                 .status(error.status)
-                .send({message: error.message});
+                .send({ message: error.message });
         }
         next(error)
     }
 }
 
-module.exports = {
-    cartToOrder
+self.getAll = async (req, res, next) => {
+    try {
+        
+        const authHeader = req.header('Authorization');
+        const token = authHeader.split(' ')[1];
+        const decodedToken = jwt.verify(token, jwtSecret);
+        const role = decodedToken.role;
+
+        const data = {};
+        switch (role) {
+            case 'Customer':
+                data = await OrderService.getAllOrdersByCustomer(decodedToken.id);
+                break;
+            case 'Delivery Person':
+                data = await OrderService.getAllOrdersByDeliveryPerson(decodedToken.id);
+                break;
+            default:
+                data = await OrderService.getAllOrders();
+                break;
+        }
+        return res.status(200).json(data);
+    } catch (error) {
+        next(error);
+    }
 }
+
+self.get = async (req, res, next) => {
+    try {
+        const orderId = req.params.orderId;
+        const authHeader = req.header('Authorization');
+        const token = authHeader.split(' ')[1];
+        const decodedToken = jwt.verify(token, jwtSecret);
+        const role = decodedToken.role;
+
+        const data = {};
+        switch (role) {
+            case 'Customer':
+                data = await OrderService.getOrderByCustomer(decodedToken.id, orderId);
+            case 'Delivery Person':
+                data = await OrderService.getOrderByDeliveryPerson(decodedToken.id, orderId);
+            default:
+                data = await OrderService.getOrder(orderId);
+        }
+        return res.status(200).json(data);
+    } catch (error) {
+        next(error);
+    }
+}
+
+self.updateStatus = async (req, res, next) => {
+    try {
+        const orderId = req.params.id;
+        const status = req.params.status;
+        const authHeader = req.header('Authorization');
+        const token = authHeader.split(' ')[1];
+        const decodedToken = jwt.verify(token, jwtSecret);
+        const role = decodedToken.role;
+        const statusForDeliveryPerson = ['in transit', 'delivered', 'not delivered'];
+        const statusForSalesExecutive = ['approved', 'denied'];
+        const statusForCustomer = ['canceled'];
+        const order = await OrderService.getOrder(orderId);
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        if (role === 'Delivery Person') {
+            if (!statusForDeliveryPerson.includes(status)) {
+                return res.status(403).json({ message: "Repartidor solo puede establecer el estado en 'en tránsito' o 'entregado' o 'no entregado'." });
+            }
+        } else if (role === 'Sales Executive') {
+            if (!statusForSalesExecutive.includes(status)) {
+                return res.status(403).json({ message: "El ejecutivo de ventas solo puede establecer el estado en 'aprobado' o 'denegado'." });
+            }
+        } else if (role === 'Customer') {
+            if (!statusForCustomer.includes(status)) {
+                return res.status(403).json({ message: "El cliente solo puede establecer el estado en 'cancelado'." });
+            }
+            if (order.status === 'in transit') {
+                return res.status(400).json({ message: "La orden está en tránsito, no se puede cancelar." });
+            }
+        } else {
+            return res.status(403).json({ message: "Rol no permitido para cambiar el estado de la orden." });
+        }
+
+        OrderService.updateStatus(orderId, status);
+        return res.status(200).json({ message: "Estado de la orden actualizado."}, order);
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+
+module.exports = self;

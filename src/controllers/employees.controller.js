@@ -4,7 +4,6 @@ const bcrypt = require('bcrypt');
 
 let self = {}
 
-// GET: api/employees
 self.getAll = async function (req, res, next) {
     try {
         const { s } = req.query;
@@ -15,7 +14,6 @@ self.getAll = async function (req, res, next) {
     }
 };
 
-// GET: api/employees/:id
 self.get = async function (req, res, next) {
     try {
         const { id } = req.params;
@@ -29,7 +27,6 @@ self.get = async function (req, res, next) {
     }
 };
 
-// POST: api/employees
 self.create = async function (req, res, next) {
     try {
         /*const errors = validationResult(req);
@@ -45,7 +42,6 @@ self.create = async function (req, res, next) {
     }
 };
 
-// PUT: api/employees/:id
 self.update = async function (req, res, next) {
     try {
         const { id } = req.params;
