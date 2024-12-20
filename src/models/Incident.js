@@ -9,6 +9,10 @@ incidentSchema = new mongoose.Schema({
     photo: {
         type: String,
         required: true
+    },
+    mime: {
+        type: String,
+        required: true
     },    
     date: {
         type: Date,
