@@ -133,7 +133,7 @@ const createClientAccount = async (req, res, next) => {
     try{
         const { username,fullname, birthdate, phone, email, password, client} = req.body;
 
-        const existinguser = await userService.findUserByEmailOrPhoneNumber(email, phone, username);
+        const existinguser = await UserService.findUserByEmailOrPhoneNumber(email, phone, username);
         
         if (existinguser) {
             return res.status(400).send({message: "Error al registrar los datos del usuario"});
@@ -164,13 +164,6 @@ const createClientAccount = async (req, res, next) => {
         }
         next(error)
     }
-}
-
-const findUserByEmailOrPhoneNumber = async (email, phone) => {
-    const user = UserModel.findOne({
-        $or: [{email}, {phone}, {username}]
-    });
-    return user;
 }
 
 const updateClientAccount = async (req, res, next) => {

@@ -227,6 +227,25 @@ const createClientAccount = async (newClientAccount) => {
     }
 }
 
+const findUserByEmailOrPhoneNumber = async (email, phone, username) => {
+    try {
+        const user = await User.findOne({
+            $or: [{ email }, { phone }, { username }]
+        });
+        
+        return user;
+    } catch (error) {
+        if (error.status) {
+            throw {
+                status: error.status,
+                message: error.message
+            };
+        }
+        throw error;
+    }
+};
+
+
 const updateClientAccount = async (userId, updatedClientAccount) => {
     try {
         const userFound = await User.findById(userId);
@@ -285,5 +304,6 @@ module.exports = {
     createClientAccount,
     updateClientAccount,
     recoverPassword,
-    getUserLogin
+    getUserLogin, 
+    findUserByEmailOrPhoneNumber
 }
