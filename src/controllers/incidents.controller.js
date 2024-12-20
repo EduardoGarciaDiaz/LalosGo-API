@@ -48,7 +48,7 @@ self.getPhoto = async function (req, res, next) {
 
         let photo = fs.readFileSync("uploads/" + data.photo)
         
-        res.status(200).contentType('image/jpeg').send(photo);
+        res.status(200).contentType(data.mime).send(photo);
     } catch (error) {
         next(error);
     }
