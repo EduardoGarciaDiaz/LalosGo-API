@@ -10,7 +10,7 @@ const upload = multer({ storage: storage }).single('image');
 
 const createProduct = async (req, res, next) => {
     try {
-        let { barCode, name, description, unitPrice, expireDate, image, weight, productStatus, unitMeasure, category } = req.body;
+        let { barCode, name, description, unitPrice, expireDate, image, weight, limit, productStatus, unitMeasure, category } = req.body;
         let { branches } = req.body;
         let newProduct = {
             barCode,
@@ -20,6 +20,7 @@ const createProduct = async (req, res, next) => {
             expireDate,
             image,
             weight,
+            limit,
             productStatus,
             unitMeasure,
             category
@@ -100,10 +101,16 @@ const updateProductImage = async (req, res, next) => {
 };
 
 
-const getAllProducts = async (req, res, next) => {
+const getBranchProducts = async (req, res, next) => {
     try {
-        // Implementar lógica para obtener productos (si es necesario)
-        // const result = await ProductsService.getAllProducts();
+        let {branchId} = req.params
+        let productsOfBranch = await ProductService.consultBranchProducts(branchId)
+    
+        return res.status(201).send({
+            message: `Productos de la sucursal recuperados exitosamente`,
+            branch: productsOfBranch
+        });    
+
     } catch (error) {
         if (error.status) {
             return res.status(error.status).send({ message: error.message });
@@ -114,5 +121,6 @@ const getAllProducts = async (req, res, next) => {
 
 module.exports = {
     createProduct,
-    updateProductImage
+    updateProductImage,
+    getBranchProducts
 }

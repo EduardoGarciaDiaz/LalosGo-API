@@ -28,11 +28,14 @@ productSchema = new mongoose.Schema({
     },
     imageId:{
         type: String
-    }
-    ,
+    },
     weight: {
         type: Number,
         required: true
+    },
+    limit:{
+        type: Number,
+        require:true
     },
     productStatus: {
         type: Boolean,

@@ -118,8 +118,41 @@ const getAllProducts = async () => {
 }
 
 
+const consultBranchProducts = async(branchId) => {
+    try {
+        let  foundBranches  = await BranchSchema.findById(branchId).populate({
+            path:'branchProducts.product',
+            populate: {
+                path: 'category',
+                model: 'categories'
+            }
+        })
+        
+        if (!foundBranches || foundBranches.length === 0) {
+            throw {
+                status: 404,
+                message: "No se encontraron sucursales registradas"
+            }
+        }
+
+        return foundBranches;
+
+    } catch (error) {
+        if (error.status) {
+            throw {
+                status: error.status,
+                message: error.message
+            }
+        }
+        throw error
+    }
+}
+
+
+
 module.exports = {
     saveNewProduct,
     saveProductInBranch,
-    saveProductImage
+    saveProductImage,
+    consultBranchProducts
 }
