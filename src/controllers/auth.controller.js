@@ -20,6 +20,7 @@ self.login = async function (req, res, next) {
         }
         let token = generateToken(data.id, data.email, data.fullname, data.role);
         res.status(200).json({
+            id: data.id.toString(),
             email: data.email,
             fullname: data.fullname,
             role: data.role,
