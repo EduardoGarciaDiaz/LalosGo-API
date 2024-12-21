@@ -78,7 +78,7 @@ const clientSchema = new mongoose.Schema({
 const employeeSchema = new mongoose.Schema({
     role: {
         type: String,
-        enum:['Manager', 'Delivery Person', 'Sales Executive' ],
+        enum:['Administrator', 'Manager', 'Delivery Person', 'Sales Executive' ],
         required: true
     },
     hiredDate:{
