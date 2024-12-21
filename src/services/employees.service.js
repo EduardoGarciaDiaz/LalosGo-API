@@ -115,7 +115,7 @@ EmployeesService.updateEmployee = async function (id, employee, isStatusChanged)
         );
 
         if (isStatusChanged) {
-            await updateEmployeeStatus(updatedEmployee);
+            await updateEmployeeStatus(employee);
         }
 
         const updatedEmployee = await User.findById(id).select('-password');
