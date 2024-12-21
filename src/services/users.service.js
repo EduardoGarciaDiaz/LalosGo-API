@@ -287,6 +287,34 @@ const recoverPassword = async (userId, newPassword) => {
     }
 }
 
+const getAddresses = async (userId) => {
+    try {
+        //TODO: Validar que el Id sea válido
+
+        const userFound = await User.findById(userId);
+
+        if (!userFound) {
+            throw {
+                status: 404,
+                message: "Usuario no encontrado"
+            };
+        }
+
+        const addresses = userFound.client.addresses;
+
+        return addresses;
+
+    } catch (error) {
+        if (error.status) {
+            throw {
+                status: error.status,
+                message: error.message
+            }
+        }
+        throw error;
+    }
+}
+
 module.exports = {
     postPaymentMethod,
     getPaymentMethods,
@@ -296,5 +324,6 @@ module.exports = {
     updateClientAccount,
     recoverPassword,
     getUserLogin, 
-    findUserByEmailOrPhoneNumber
+    findUserByEmailOrPhoneNumber,
+    getAddresses
 }
