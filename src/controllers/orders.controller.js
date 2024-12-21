@@ -34,7 +34,6 @@ self.cartToOrder = async (req, res, next) => {
 
         const orderDetails = {
             orderId: orderId,
-            orderNumber: Math.floor(Math.random() * 1000000),
             orderDate: new Date(),
             totalPrice: finalPrice,
             branch: branch,
