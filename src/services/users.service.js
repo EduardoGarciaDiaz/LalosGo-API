@@ -1,5 +1,6 @@
 const { raw } = require('express');
 const User = require('../models/User');
+const { default: mongoose } = require('mongoose');
 
 const postPaymentMethod = async (userId, newPaymentMethod) => {
     try {
@@ -167,6 +168,30 @@ const updatePaymentMethod = async (userId, paymentMethodId, updatedPaymentMethod
     }
 }
 
+const getUser = async function (id) {
+    try{
+        if(!mongoose.Types.ObjectId.isValid(id)){
+            const error = new Error('Usuario con id inválido ' + id);
+            error.status = 404;
+            throw error;
+        }
+        
+        let foundUser = await User.findById(id).select('-password');
+
+        return foundUser;
+
+    } catch(error){
+        if(error.status){
+            throw {
+                status: error.status,
+                message: error.message
+            }
+
+        }
+        throw error;
+    }
+}
+
 const getUserLogin = async (username) => {
     try {
         const userFound = await User.findOne({ username })
@@ -179,10 +204,14 @@ const getUserLogin = async (username) => {
 
             return {
                 id: userFound._id.toString(),
+                username: userFound.username,
                 fullname: userFound.fullname,
-                role: 'Customer',
+                birthdate: userFound.birthdate,
+                phone: userFound.phone,
+                email: userFound.email,
                 password: userFound.password,
-                email: userFound.email
+                status: userFound.status,
+                role: 'Customer'
             };
         } else if (userFound.employee) {
             return {
@@ -239,20 +268,40 @@ const findUserByEmailOrPhoneNumber = async (email, phone, username) => {
 };
 
 
-const updateClientAccount = async (userId, updatedClientAccount) => {
-    try {
-        const userFound = await User.findById(userId);
+const updateClientAccount = async (id, client) => {
+    try{
+       const repeatedUser = await User.findOne({
+            $or:[
+                {username: client.username},
+                {email: client.email},
+                {phone: client.phone}
+            ], 
+            _id: {$ne: id}
+        });
 
-        if (!userFound) {
-            const error = new Error('Usuario no encontrado');
-            error.status = 404;
+        if(repeatedUser){
+            const error = new Error('La información es incorrecta');
+            error.status = 400;
+            throw error;
+        }     
+
+        const updateClientData = await User.findOneAndUpdate(
+            {_id: id},
+            {$set: client},
+            {new: true}
+        );
+
+        if(!updateClientData){
+            console.log("No se pudo actualizar el usuario");
+            const error = new Error('No se pudo actualizar el usuario');
+            error.status = 500;
+            throw error;
         }
 
-        userFound.set(updatedClientAccount);
-        await userFound.save();
-        return userFound;
-    } catch (error) {
-        if (error.status) {
+        const updatedClient = await User.findById(id).select('-password');
+        return updatedClient;
+    } catch(error){
+        if(error.status){
             throw {
                 status: error.status,
                 message: error.message
@@ -269,7 +318,7 @@ const recoverPassword = async (userId, newPassword) => {
         if (!userFound) {
             throw {
                 status: 404,
-                message: "Usuario no encontrado"
+                message: "RecoverPassword: Usuario no encontrado"
             };
         }
 
@@ -295,6 +344,7 @@ module.exports = {
     createClientAccount,
     updateClientAccount,
     recoverPassword,
-    getUserLogin, 
+    getUserLogin,
+    getUser,
     findUserByEmailOrPhoneNumber
 }
