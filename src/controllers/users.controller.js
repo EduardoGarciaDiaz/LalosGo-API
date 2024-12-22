@@ -171,15 +171,37 @@ const createClientAccount = async (req, res, next) => {
 }
 
 const updateClientAccount = async (req, res, next) => {
-    try{
-        const {id} = req.params;
-        const clientUpdated = req.body;
-        await UserService.getUser(id);
-        const data = await UserService.updateClientAccount(id, clientUpdated);
-        return res.status(200).json(data);
-    }catch (error) {
+    try {
+        const userId = req.params.id;
+        if(!userId || userId === null || userId === '') {
+            return res.status(400).send({error: `El id del usuario '${userId}' está vacío o nulo`});
+        }
+
+        const { username, fullname, birthdate, phone} = req.body;
+
+        const updateClientAccount = {
+            username,
+            fullname,
+            birthdate,
+            phone
+        }
+
+        console.log(updateClientAccount.username);
+        
+        const result = await UserService.updateClientAccount(userId, updateClientAccount);
+        return res.status(200).send({
+            message: "Cuenta de cliente actualizada correctamente",
+            updateClientAccount: result
+        });
+
+    } catch (error) {
+        if (error.status) {
+            return res
+                .status(error.status)
+                .send({message: error.message});
+        }
         next(error)
-    }
+    }   
 }
 
 const recoverPassword = async (req, res, next) => {

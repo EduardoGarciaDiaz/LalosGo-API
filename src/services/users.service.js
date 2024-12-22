@@ -269,45 +269,25 @@ const findUserByEmailOrPhoneNumber = async (email, phone, username) => {
 
 
 const updateClientAccount = async (id, client) => {
-    try{
-       const repeatedUser = await User.findOne({
-            $or:[
-                {username: client.username},
-                {email: client.email},
-                {phone: client.phone}
-            ], 
-            _id: {$ne: id}
-        });
-
-        if(repeatedUser){
-            const error = new Error('La información es incorrecta');
-            error.status = 400;
-            throw error;
-        }     
-
-        const updateClientData = await User.findOneAndUpdate(
-            {_id: id},
-            {$set: client},
-            {new: true}
-        );
-
-        if(!updateClientData){
-            console.log("No se pudo actualizar el usuario");
-            const error = new Error('No se pudo actualizar el usuario');
-            error.status = 500;
-            throw error;
-        }
-
-        const updatedClient = await User.findById(id).select('-password');
-        return updatedClient;
-    } catch(error){
-        if(error.status){
+    try {
+        const userFound = await User.findById(id);
+        console.log(userFound.username);
+        if(!userFound){
             throw {
-                status: error.status,
-                message: error.message
-            }
+                status: 404,
+                message: "Usuario no encontrado"
+            };
         }
-        throw error;
+
+        +userFound.set(client);
+        await userFound.save();
+
+        return userFound;
+    } catch (error) {
+        return {
+            status: error.status || 500,
+            message: error.message || "Error al actualizar la cuenta de cliente"  
+        }
     }
 }
 
