@@ -175,22 +175,11 @@ const createClientAccount = async (req, res, next) => {
 
 const updateClientAccount = async (req, res, next) => {
     try{
-        const { fullname, birthdate, phone, email, password} = req.body;
-        const userId = req.params.userId;
-
-        const newClientAccount = {
-            fullname,
-            birthdate,
-            phone,
-            email,
-            password,
-            status: 'Active', 
-        }
-        const result = await UserService.updateClientAccount(userId, newClientAccount);
-        return res.status(200).send({
-            message: "Cuenta de cliente creada correctamente",
-            newClientAccount: result
-        });
+        const {id} = req.params;
+        const clientUpdated = req.body;
+        await UserService.getUser(id);
+        const data = await UserService.updateClientAccount(id, clientUpdated);
+        return res.status(200).json(data);
     }catch (error) {
         next(error)
     }
