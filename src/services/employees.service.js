@@ -1,21 +1,18 @@
 const mongoose = require('mongoose');
 const User = require('../models/User');
+const Branch = require('../models/Branch');
 const bcrypt = require('bcrypt');
 
 const EmployeesService = {};
 
-EmployeesService.getAllEmployees = async function (searchQuery) {
+EmployeesService.getAllEmployees = async function () {
     try {
-
-        const filters = { employee: { $exists: true } };
-        if (searchQuery) {
-            filters['fullname'] = {
-                $regex: searchQuery,
-                $options: 'i'
-            };
-        }
-
-        return await User.find(filters).select('-password');
+        return await User.find({ employee: { $exists: true } })
+            .select('-password')
+            .populate({
+                path: 'employee.branch',
+                select: 'name'
+            });
     } catch (error) {
         throw error;
     }

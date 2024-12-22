@@ -6,9 +6,10 @@ let self = {}
 
 self.getAll = async function (req, res, next) {
     try {
-        const { s } = req.query;
-        const data = await EmployeesService.getAllEmployees(s);
-        return res.status(200).json(data);
+        const data = await EmployeesService.getAllEmployees();
+        return res.status(200).send({
+            employees: data
+        })
     } catch (error) {
         next(error);
     }

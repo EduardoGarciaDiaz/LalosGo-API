@@ -39,7 +39,6 @@ const createProduct = async (req, res, next) => {
             product: productSaved
         });
     } catch (error) {
-        console.log(error);
         if (error.status) {
             return res.status(error.status).send({ message: error.message });
         }

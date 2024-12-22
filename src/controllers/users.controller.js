@@ -162,8 +162,6 @@ const createClientAccount = async (req, res, next) => {
             newClientAccount: result
         });
     }catch (error) {
-        
-        console.log(error)
         if (error.status) {
             return res
                 .status(error.status)
