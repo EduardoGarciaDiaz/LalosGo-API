@@ -37,12 +37,15 @@ const clientSchema = new mongoose.Schema({
             required: true
         },
         latitude: {
-            type: String,
+            type: Number,
             required: true
         }, 
         longitude: {
-            type: String, 
+            type: Number, 
             required: true
+        },
+        isCurrentAddress: {
+            type: Boolean
         }
     }],
     paymentMethods: [{
@@ -74,6 +77,8 @@ const clientSchema = new mongoose.Schema({
         }
     }]    
 })
+
+
 
 const employeeSchema = new mongoose.Schema({
     role: {
@@ -132,16 +137,16 @@ userSchema = new mongoose.Schema({
     },
     client: {
         type: clientSchema,
-        required: false,
     },
     employee: {
         type: employeeSchema,
-        required: false,
     }    
 },
 {
     timestamps: true,
     versionKey: false
 })
+
+
 
 module.exports = model("users", userSchema)

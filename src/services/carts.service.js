@@ -106,9 +106,16 @@ const getCart = async (userId, status) => {
         if (status !== undefined && status === CART_STATUS) {
 
             const cartOrder = await Order.findOne({ customer: userId, statusOrder: status })
-            .populate({
-                path: 'orderProducts.product'
-            });
+            .populate([
+                { path: 'orderProducts.product' },
+                { path: 'branch', 
+                    select: 'address'
+                },
+                {
+                    path: 'customer',
+                    select: 'client.addresses'
+                }
+            ]);            
 
             return cartOrder;
         }
@@ -158,11 +165,17 @@ const updateCartQuantities = async (orderId, status, newCartInfo) => {
                 if (productIndex >= 0) {
                     if (quantity > 0) {
                         const stockResult = await isStockAvailable(newCartInfo);
+                        const currentProduct = cartOrder.orderProducts[productIndex].product;
                         
                         if (stockResult.maxStock === 0) {
                             cartOrder.orderProducts.splice(productIndex, 1);
                         } else if (stockResult.hasStock) {
-                            cartOrder.orderProducts[productIndex].quantity = quantity;
+                            if (quantity <= currentProduct.limit) {
+                                cartOrder.orderProducts[productIndex].quantity = quantity;
+                            } else {
+                                cartOrder.orderProducts[productIndex].quantity = currentProduct.limit;
+                                stockResult.hasStock = false;
+                            }
                         } else {
                             cartOrder.orderProducts[productIndex].quantity = stockResult.maxStock;
                         }
@@ -195,7 +208,7 @@ const updateCartQuantities = async (orderId, status, newCartInfo) => {
     }
 }
 
-const getCartPrice = async (userId, status) => {
+const getMainCartDetails = async (userId, status) => {
     try {
         if (status === undefined && status !== CART_STATUS) {
             throw {
@@ -207,7 +220,17 @@ const getCartPrice = async (userId, status) => {
         const cart = await Order.findOne({ 
             customer: userId,
             statusOrder: status
-        });
+        })
+        .populate([
+            {
+                path: 'branch',
+                select: 'address'
+            },
+            {
+                path: 'customer',
+                select: 'client.addresses'
+            }
+        ]);
 
         if (!cart) {
             throw {
@@ -227,7 +250,10 @@ const getCartPrice = async (userId, status) => {
 
         return {
             totalPrice: finalPrice,
-            orderId: cart._id
+            orderId: cart._id,
+            branchId: cart.branch,
+            branchAddress: cart.branch.address,
+            clientAddresses: cart.customer.client.addresses
         }
             
     } catch (error) {
@@ -290,6 +316,6 @@ module.exports = {
     getCart,
     deleteCart,
     updateCartQuantities,
-    getCartPrice,
+    getMainCartDetails,
     saveProductInCart
 }

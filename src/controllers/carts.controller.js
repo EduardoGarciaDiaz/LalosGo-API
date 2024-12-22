@@ -117,12 +117,12 @@ const updateCartQuantities = async (req, res, next) => {
     }
 }
 
-const getCartPrice = async (req, res, next) => {
+const getMainCartDetails = async (req, res, next) => {
     try {
         const userId = req.params.userId;
         const status = req.query.status;
 
-        const result = await CartService.getCartPrice(userId, status);
+        const result = await CartService.getMainCartDetails(userId, status);
 
         if (!result) {
             throw {
@@ -155,5 +155,5 @@ module.exports = {
     getCart,
     deleteCart,
     updateCartQuantities,
-    getCartPrice,
+    getMainCartDetails
 }

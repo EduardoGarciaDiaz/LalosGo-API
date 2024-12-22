@@ -137,7 +137,7 @@ const createClientAccount = async (req, res, next) => {
         const existinguser = await UserService.findUserByEmailOrPhoneNumber(email, phone, username);
         
         if (existinguser) {
-            return res.status(400).send({message: "Error al registrar los datos del usuario"});
+            return res.status(400).send({message: "Error al registrar los datos del usuario, correo, numero o usuario repetido"});
         }
 
         const saltRounds = 10;
@@ -157,10 +157,13 @@ const createClientAccount = async (req, res, next) => {
         const result = await UserService.createClientAccount(newClientAccount);
 
         return res.status(201).send({
+            
             message: "Cuenta de cliente creada correctamente",
             newClientAccount: result
         });
     }catch (error) {
+        
+        console.log(error)
         if (error.status) {
             return res
                 .status(error.status)
@@ -243,6 +246,31 @@ const recoverPassword = async (req, res, next) => {
 
 }
 
+
+const getAddresses = async (req, res, next) => {
+    try {
+        const userId = req.params.userId;
+        if (!userId || userId === null || userId === '') {
+            return res.status(400).send({error: `El id del usuario '${userId}' viene nulo o vacío`})
+        }
+
+        const result = await UserService.getAddresses(userId);
+
+        return res.status(200).send({
+            message: "Direcciones recuperadas",
+            addresses: result
+        });
+    } catch (error) {
+        if (error.status) {
+            return res
+                .status(error.status)
+                .send({message: error.message});
+        }
+        next(error)
+    }
+}
+
+
 module.exports = {
     postPaymentMethod,
     getPaymentMethods,
@@ -250,5 +278,6 @@ module.exports = {
     updatePaymentMethod, 
     createClientAccount, 
     updateClientAccount, 
-    recoverPassword
+    recoverPassword,
+    getAddresses
 }
