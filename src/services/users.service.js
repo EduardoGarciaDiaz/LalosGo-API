@@ -1,5 +1,6 @@
 const { raw } = require('express');
 const User = require('../models/User');
+const { default: mongoose } = require('mongoose');
 
 const postPaymentMethod = async (userId, newPaymentMethod) => {
     try {
@@ -167,6 +168,30 @@ const updatePaymentMethod = async (userId, paymentMethodId, updatedPaymentMethod
     }
 }
 
+const getUser = async function (id) {
+    try{
+        if(!mongoose.Types.ObjectId.isValid(id)){
+            const error = new Error('Usuario con id inválido ' + id);
+            error.status = 404;
+            throw error;
+        }
+        
+        let foundUser = await User.findById(id).select('-password');
+
+        return foundUser;
+
+    } catch(error){
+        if(error.status){
+            throw {
+                status: error.status,
+                message: error.message
+            }
+
+        }
+        throw error;
+    }
+}
+
 const getUserLogin = async (username) => {
     try {
         const userFound = await User.findOne({ username })
@@ -179,10 +204,14 @@ const getUserLogin = async (username) => {
 
             return {
                 id: userFound._id.toString(),
+                username: userFound.username,
                 fullname: userFound.fullname,
-                role: 'Customer',
+                birthdate: userFound.birthdate,
+                phone: userFound.phone,
+                email: userFound.email,
                 password: userFound.password,
-                email: userFound.email
+                status: userFound.status,
+                role: 'Customer'
             };
         } else if (userFound.employee) {
             return {
@@ -239,26 +268,26 @@ const findUserByEmailOrPhoneNumber = async (email, phone, username) => {
 };
 
 
-const updateClientAccount = async (userId, updatedClientAccount) => {
+const updateClientAccount = async (id, client) => {
     try {
-        const userFound = await User.findById(userId);
-
-        if (!userFound) {
-            const error = new Error('Usuario no encontrado');
-            error.status = 404;
+        const userFound = await User.findById(id);
+        console.log(userFound.username);
+        if(!userFound){
+            throw {
+                status: 404,
+                message: "Usuario no encontrado"
+            };
         }
 
-        userFound.set(updatedClientAccount);
+        +userFound.set(client);
         await userFound.save();
+
         return userFound;
     } catch (error) {
-        if (error.status) {
-            throw {
-                status: error.status,
-                message: error.message
-            }
+        return {
+            status: error.status || 500,
+            message: error.message || "Error al actualizar la cuenta de cliente"  
         }
-        throw error;
     }
 }
 
@@ -269,7 +298,7 @@ const recoverPassword = async (userId, newPassword) => {
         if (!userFound) {
             throw {
                 status: 404,
-                message: "Usuario no encontrado"
+                message: "RecoverPassword: Usuario no encontrado"
             };
         }
 
@@ -323,7 +352,8 @@ module.exports = {
     createClientAccount,
     updateClientAccount,
     recoverPassword,
-    getUserLogin, 
+    getUserLogin,
+    getUser, 
     findUserByEmailOrPhoneNumber,
     getAddresses
 }
