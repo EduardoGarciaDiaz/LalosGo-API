@@ -227,7 +227,8 @@ const getCartPrice = async (userId, status) => {
 
         return {
             totalPrice: finalPrice,
-            orderId: cart._id
+            orderId: cart._id,
+            branchId: cart.branch
         }
             
     } catch (error) {

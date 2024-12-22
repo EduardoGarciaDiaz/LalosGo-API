@@ -9,5 +9,6 @@ router.patch('/:userId/payment-methods/:paymentMethodId', userController.updateP
 router.post('/', userController.createClientAccount);
 router.put('/:userId', userController.updateClientAccount);
 router.patch('/:userId', userController.recoverPassword);
+router.get('/:userId/addresses', userController.getAddresses);
 
 module.exports = router

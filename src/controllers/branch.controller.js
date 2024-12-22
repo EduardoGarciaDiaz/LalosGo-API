@@ -77,11 +77,15 @@ const editBranch = async(req, res, next) => {
 const consultBranches = async(req, res, next) => {
     try {
         let {recoverProduct} = req.query
+        let {location} = req.query
         if(recoverProduct !== undefined && recoverProduct){
             resultOperation = await BranchService.consultBranches(true)
+        }else if(location){
+            resultOperation  = await BranchService.getNearestBranch(location)
         }else{
             resultOperation = await BranchService.consultBranches(false)
-        }        
+     
+        }
         return res.status(200).send({
             message: "",
             branches: resultOperation

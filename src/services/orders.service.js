@@ -24,7 +24,6 @@ const cartToOrder = async (orderDetails) => {
         }
 
         order.set({
-            orderNumber: orderDetails.orderNumber,
             orderDate: orderDetails.orderDate,
             totalPrice: orderDetails.totalPrice,
             branch: orderDetails.branch,
