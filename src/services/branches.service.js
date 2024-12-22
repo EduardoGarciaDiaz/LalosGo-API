@@ -10,7 +10,7 @@ const saveBranch = async (branch) => {
         if (reapeatedBranch) {
             throw {
                 status: 400,
-                message: "La sucursal ya se encuentra registrada."
+                message: "Ya existe una sucursal con ese nombre."
             }
         }
 
@@ -36,6 +36,14 @@ const updateBranch = async (branchToUpdate, isStatusChange) => {
             throw {
                 status: 404,
                 message: "La sucursal que quieres editar no existe."
+            }
+        }
+
+        let existingBranch = await BranchSchema.findOne({ name: branchToUpdate.name, _id: { $ne: branchToUpdate._id } });
+        if (existingBranch) {
+            throw {
+                status: 400,
+                message: "Ya existe una sucursal con ese nombre."
             }
         }
 
@@ -84,10 +92,6 @@ const updateBranchProductsQuantity = async (branchToUpdate, productsToAdd) => {
     }
 }
 
-
-
-
-
 async function updateBranchStatuss(branchToChangeStatus) {
     //Desactivar empleador de la empresa.
 }
@@ -110,6 +114,39 @@ const consultBranches = async (isRecoveringProducts) => {
         }
 
         return foundBranches;
+
+    } catch (error) {
+        if (error.status) {
+            throw {
+                status: error.status,
+                message: error.message
+            }
+        }
+        throw error
+    }
+}
+
+const consultBranch = async (branchId) => {
+    try {
+        let branchFound;
+
+        if (branchId!==undefined && branchId) {
+            branchFound = await BranchSchema.findById(branchId);
+        } else {
+            throw {
+                status: 400,
+                message: "El id de la sucursal es requerido."
+            }
+        }
+
+        if (!branchFound) {
+            throw {
+                status: 404,
+                message: "No se encontró la sucursal con el id " + branchId
+            }
+        }
+
+        return branchFound;
 
     } catch (error) {
         if (error.status) {
@@ -150,7 +187,6 @@ const toggleBranchStatus = async (branchId, newStatus) => {
         throw error
     }
 }
-
 
 const getNearestBranch = async (userLocation) => {
     try {
@@ -213,8 +249,9 @@ module.exports = {
     updateBranch,
     updateBranchProductsQuantity,
     consultBranches,
+    consultBranch,
     toggleBranchStatus,
-    getNearestBranch
+    getNearestBranch,
 }
 
 
