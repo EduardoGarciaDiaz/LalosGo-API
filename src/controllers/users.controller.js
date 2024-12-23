@@ -42,7 +42,7 @@ const getPaymentMethods = async (req, res, next) => {
     try {
         const userId = req.params.userId;
         if (!userId || userId === null || userId === '') {
-            return res.status(400).send({error: `El id del usuario '${userId}' viene nulo o vacío`})
+            return res.status(400).send({message: `El id del usuario '${userId}' viene nulo o vacío`})
         }
 
         const result = await UserService.getPaymentMethods(userId);
@@ -65,12 +65,12 @@ const deletePaymentMethod = async (req, res, next) => {
     try {
         const userId = req.params.userId;
         if (!userId || userId === null || userId === '') {
-            return res.status(400).send({error: `El id del usuario '${userId}' viene nulo o vacío`})
+            return res.status(400).send({message: `El id del usuario '${userId}' viene nulo o vacío`})
         }
 
         const paymentMethodId = req.params.paymentMethodId;
         if (!paymentMethodId || paymentMethodId === null || paymentMethodId === '') {
-            return res.status(400).send({error: `El id del método de pago '${paymentMethodId}' viene nulo o vacío`})
+            return res.status(400).send({message: `El id del método de pago '${paymentMethodId}' viene nulo o vacío`})
         }
 
         const result = await UserService.deletePaymentMethod(userId, paymentMethodId);
@@ -93,12 +93,12 @@ const updatePaymentMethod = async (req, res, next) => {
     try {
         const userId = req.params.userId;
         if (!userId || userId === null || userId === '') {
-            return res.status(400).send({error: `El id del usuario '${userId}' viene nulo o vacío`})
+            return res.status(400).send({message: `El id del usuario '${userId}' viene nulo o vacío`})
         }
 
         const paymentMethodId = req.params.paymentMethodId;
         if (!paymentMethodId || paymentMethodId === null || paymentMethodId === '') {
-            return res.status(400).send({error: `El id del método de pago '${paymentMethodId}' viene nulo o vacío`})
+            return res.status(400).send({message: `El id del método de pago '${paymentMethodId}' viene nulo o vacío`})
         }
 
         const { cardOwner, cardNumber, cardEmitter, expirationDate, cvv, cardType, paymentNetwork } = req.body;
