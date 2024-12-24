@@ -6,6 +6,8 @@ const ProductsController = require('../../controllers/products.controller.js');
 router.post('/', ProductsController.createProduct)
 router.put('/:productId', ProductsController.updateProductImage)
 router.get('/:branchId', ProductsController.getBranchProducts)
+router.get('/', ProductsController.getProducts)
+router.patch('/:productId', ProductsController.patchProduct)
 
 
 module.exports = router
