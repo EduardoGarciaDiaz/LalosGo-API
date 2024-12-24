@@ -8,11 +8,11 @@ branchSchema = new mongoose.Schema({
         unique: true
     },
     openingTime: {
-        type: String, //#Formato 24:00
+        type: String,
         required: true
     },
     closingTime: {
-        type: String, //#Formato 24:00
+        type: String,
         required: true,
     },
     address: {

@@ -9,3 +9,10 @@ Content-Type: application/json
   "password": "Asfixiars3#",
   "roles": ["Guest", "Host"]
 }
+
+###GET
+GET http://localhost:3000/api/v1/users/6767757d904c1f142fbffc3c/payment-methods
+
+
+###
+DELETE http://localhost:3000/api/v1/users/6767757d904c1f142fbffc3c/payment-methods/0
