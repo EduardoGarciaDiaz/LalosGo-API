@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const ProductSchema = require('../models/Product')
 const BranchSchema = require('../models/Branch')
+const Product = require('../models/Product')
 
 const saveNewProduct = async(newProduct) => {
     try {
@@ -101,23 +102,6 @@ const saveProductInBranch = async (branches, productToAdd) => {
     }
 };
 
-
-
-const getAllProducts = async () => {
-    try {
-        // TODO
-    } catch (error) {
-        if (error.status) {
-            throw {
-                status: error.status,
-                message: error.message
-            }
-        }
-        throw error;
-    }
-}
-
-
 const consultBranchProducts = async(branchId) => {
     try {
         let  foundBranches  = await BranchSchema.findById(branchId).populate({
@@ -148,11 +132,64 @@ const consultBranchProducts = async(branchId) => {
     }
 }
 
+const getProducts = async () => {
+    try{
+        const products = await ProductSchema.find().populate('category')
+
+        if (!products || products.length === 0) {
+            throw {
+                status: 404,
+                message: "No se encontraron productos registrados"
+            }
+        }
+
+        return products
+    } catch (error) {
+        if (error.status) {
+            throw {
+                status: error.status,
+                message: error.message
+            }
+        }
+        throw error
+    }
+
+}
+
+const patchProduct = async(productId, productStatus) => {
+    try {
+       const updateProduct = await Product.findByIdAndUpdate(
+            productId, 
+            { productStatus}, 
+            { new: true, }
+       );
+
+       if(!updateProduct){
+           throw{
+               status: 404,
+               message: "El producto no se encuentra registrado."
+           }
+       }
+
+       return updateProduct;
+
+    } catch (error){
+        if (error.status) {
+            throw {
+                status: error.status,
+                message: error.message
+            }
+        }
+        throw error
+    }
+}
 
 
 module.exports = {
     saveNewProduct,
     saveProductInBranch,
     saveProductImage,
-    consultBranchProducts
+    consultBranchProducts, 
+    getProducts, 
+    patchProduct
 }

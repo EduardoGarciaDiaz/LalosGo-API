@@ -18,5 +18,6 @@ router.post('/', userController.createClientAccount);
 router.put('/:id', /*authorize('customer'),*/  userController.updateClientAccount);
 router.patch('/:id', /*authorize('customer'),*/ userController.recoverPassword);
 router.get('/:userId/addresses', userController.getAddresses);
-
-module.exports = router;
+router.post('/:userId/addresses', userController.postAddress);
+router.put('/:userId/addresses/:addressId', userController.putAddress);
+module.exports = router
