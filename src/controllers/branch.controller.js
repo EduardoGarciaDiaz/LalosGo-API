@@ -15,7 +15,7 @@ const createBranch = async(req, res, next) => {
         }
         resultOperation = await BranchService.saveBranch(newBranch)
         return res.status(201).send({
-            message:"Sucursal creada exitosamente.",
+            message:"Sucursal creada con éxito.",
             branch: resultOperation  
         })
     } catch (error) {
@@ -32,7 +32,7 @@ const editBranch = async(req, res, next) => {
     try {
         let {branchId} = req.params
         let {_id, name, openingTime, closingTime, address,branchStatus} = req.body
-        let {changeStatus} = req.query
+        let { changeStatus } = req.query
         let {branchProducts} = req.body
         let branchToUpdate = {
             _id: branchId, 
@@ -43,7 +43,7 @@ const editBranch = async(req, res, next) => {
         }
         let resultOperation
         let message
-        if(changeStatus){
+        if (changeStatus !== undefined && changeStatus) {
             branchToUpdate.status = changeStatus
             resultOperation = await BranchService.updateBranch(branchToUpdate, true)
             if(changeStatus==="Active"){
@@ -51,10 +51,10 @@ const editBranch = async(req, res, next) => {
             }else{
                 message = "La sucursal se ha desactivado correctamente."
             }
-        }else if (branchProducts){
+        } else if (branchProducts){
             resultOperation = await BranchService.updateBranchProductsQuantity(branchToUpdate, branchProducts)
-            message = "Se han Guardado los productos de la sucursal correctamente"
-        }else{
+            message = "Se han guardado los productos de la sucursal correctamente"
+        } else {
             resultOperation = await BranchService.updateBranch(branchToUpdate, false)
             message = "Se ha actualizado la información de la sucursal correctamente"
         }
@@ -78,13 +78,13 @@ const consultBranches = async(req, res, next) => {
     try {
         let {recoverProduct} = req.query
         let {location} = req.query
-        if(recoverProduct !== undefined && recoverProduct){
+        if (recoverProduct !== undefined && recoverProduct){
             resultOperation = await BranchService.consultBranches(true)
-        }else if(location){
+        } else if (location) {
             resultOperation  = await BranchService.getNearestBranch(location)
-        }else{
+        } else {
             resultOperation = await BranchService.consultBranches(false)
-     
+    
         }
         return res.status(200).send({
             message: "",
@@ -100,9 +100,29 @@ const consultBranches = async(req, res, next) => {
     }
 }
 
+const consultBranch = async(req, res, next) => {
+    try {
+        let { branchId } = req.params;
+
+        let branch = await BranchService.consultBranch(branchId);
+        
+        return res.status(200).send({
+            message: "Sucursal recupera con éxito",
+            branch: branch
+        })
+    } catch (error) {
+        if (error.status) {
+            return res
+                .status(error.status)
+                .send({message: error.message});
+        }
+        next(error)
+    }
+}
+
 const toggleBranchStatus = async(req, res, next) => {
     try {
-        let {branchId} = req.params
+        let { branchId } = req.params
         let resultOperation = await BranchService.toggleBranchStatus(branchId);
         return res.status(200).send({
             message: "Estado de sucursal actualizado.",
@@ -122,5 +142,6 @@ module.exports = {
     createBranch, 
     editBranch,
     consultBranches,
+    consultBranch,
     toggleBranchStatus
 }

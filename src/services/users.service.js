@@ -5,16 +5,10 @@ const { get } = require('../controllers/orders.controller');
 
 const postPaymentMethod = async (userId, newPaymentMethod) => {
     try {
-        //TODO: Validar que el Id sea válido
-
-        //TODO: Validar que la fecha de expiración sea válida
-
-        //TODO: Validar que No tenga 3 tarjetas YA registradas
 
         if (newPaymentMethod.cardNumber) {
-            const existingCard = await User.findOne({ 'paymentMethods.cardNumber': newPaymentMethod.cardNumber });
+            const existingCard = await User.findOne({ 'client.paymentMethods.cardNumber': newPaymentMethod.cardNumber });
 
-            //TODO: Validar que la tarjeta no esté registrada a el usuario
             if (existingCard && existingCard._id.toString() == userId) {
                 console.log('El método de pago ya está registrado.');
                 throw {
@@ -22,11 +16,6 @@ const postPaymentMethod = async (userId, newPaymentMethod) => {
                     message: "El método de pago ya está registrado."
                 };
             }
-
-            //TODO: Cifrar el CVV y numero de tarjeta
-            // if (newPaymentMethod.cvv !== null && newPaymentMethod && newPaymentMethod.trim() !== ''){
-            //     newPaymentMethod = await User.encryptCVV(newPaymentMethod.cvv);
-            // }
 
             const userFound = await User.findById(userId);
 
@@ -271,45 +260,24 @@ const findUserByEmailOrPhoneNumber = async (email, phone, username) => {
 
 
 const updateClientAccount = async (id, client) => {
-    try{
-       const repeatedUser = await User.findOne({
-            $or:[
-                {username: client.username},
-                {email: client.email},
-                {phone: client.phone}
-            ], 
-            _id: {$ne: id}
-        });
-
-        if(repeatedUser){
-            const error = new Error('La información es incorrecta');
-            error.status = 400;
-            throw error;
-        }     
-
-        const updateClientData = await User.findOneAndUpdate(
-            {_id: id},
-            {$set: client},
-            {new: true}
-        );
-
-        if(!updateClientData){
-            console.log("No se pudo actualizar el usuario");
-            const error = new Error('No se pudo actualizar el usuario');
-            error.status = 500;
-            throw error;
-        }
-
-        const updatedClient = await User.findById(id).select('-password');
-        return updatedClient;
-    } catch(error){
-        if(error.status){
+    try {
+        const userFound = await User.findById(id);
+        if(!userFound){
             throw {
-                status: error.status,
-                message: error.message
-            }
+                status: 404,
+                message: "Usuario no encontrado"
+            };
         }
-        throw error;
+
+        +userFound.set(client);
+        await userFound.save();
+
+        return userFound;
+    } catch (error) {
+        return {
+            status: error.status || 500,
+            message: error.message || "Error al actualizar la cuenta de cliente"  
+        }
     }
 }
 
@@ -338,9 +306,16 @@ const recoverPassword = async (userId, newPassword) => {
     }
 }
 
-const getAddresses = async (userId) => {
+
+const postAddress = async (userId, newAddress) => {
     try {
-        //TODO: Validar que el Id sea válido
+        //Validar el id del usuario
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            throw {
+                status: 400,
+                message: "El id del usuario es inválido"
+            };
+        }
 
         const userFound = await User.findById(userId);
 
@@ -350,10 +325,10 @@ const getAddresses = async (userId) => {
                 message: "Usuario no encontrado"
             };
         }
+        userFound.client.addresses.push(newAddress);
 
-        const addresses = userFound.client.addresses;
-
-        return addresses;
+        await userFound.save();
+        return newAddress;
 
     } catch (error) {
         if (error.status) {
@@ -366,6 +341,67 @@ const getAddresses = async (userId) => {
     }
 }
 
+
+const putAddress = async (userId, addressId, updatedPaymentMethod) => {
+    try {
+
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            console.log('El id del usuario es inválido');
+            throw {
+                status: 400,
+                message: "El id del usuario es inválido"
+            };
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(addressId)) {
+            console.log('El id de la dirección es inválido');
+            throw {
+                status: 400,
+                message: "El id de la dirección es inválido"
+            };
+        }
+
+        const userFound = await User.findById(userId);
+
+        if (!userFound) {
+            throw {
+                status: 404,
+                message: "Usuario no encontrado"
+            };
+        }
+
+        if (!userFound.client.addresses) {
+            console.log('El usuario no tiene direcciones asignadas');
+            throw {
+                status: 400,
+                message: "El usuario no tiene direcciones asignadas"
+            };
+        }
+
+        const addressFound = userFound.client.addresses.id(addressId);
+        if (!addressFound) {
+            throw {
+                status: 404,
+                message: "Método de pago no encontrado"
+            };
+        }
+
+        addressFound.set(updatedPaymentMethod);
+        await userFound.save();
+
+        return addressFound;
+    } catch (error) {
+        if (error.status) {
+            throw {
+                status: error.status,
+                message: error.message
+            }
+        }
+        throw error;
+    }
+}
+
+
 module.exports = {
     postPaymentMethod,
     getPaymentMethods,
@@ -374,7 +410,9 @@ module.exports = {
     createClientAccount,
     updateClientAccount,
     recoverPassword,
-    getUserLogin, 
+    getUserLogin,
+    getUser, 
     findUserByEmailOrPhoneNumber,
-    getUser, getAddresses
+    postAddress, 
+    putAddress
 }

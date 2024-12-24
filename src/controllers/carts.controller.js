@@ -1,9 +1,17 @@
 const CartService = require('../services/carts.service.js');
 const CART_STATUS = 'reserved';
-
+const { validationResult } = require('express-validator');
 
 const creteCart = async (req,res,next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
+
         let {userId, productForCart, branchId} = req.body
         let operationResult = await CartService.saveProductInCart(userId, productForCart, branchId)
         
@@ -23,22 +31,16 @@ const creteCart = async (req,res,next) => {
 
 const getCart = async (req, res, next) => { 
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
+
         const userId = req.params.userId;
         const status = req.query.status;
-
-        if (!userId) {
-            throw {
-                status: 400,
-                message: "Falta el id del usuario"
-            };
-        }
-
-        if (status === undefined || status !== CART_STATUS) {
-            throw {
-                status: 400,
-                message: "El estado de la orden no es corresponde a un carrito"
-            };
-        }
 
         const result = await CartService.getCart(userId, status);
 
@@ -59,6 +61,14 @@ const getCart = async (req, res, next) => {
 
 const deleteCart = async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
+
         const orderId = req.params.orderId;
         const status = req.query.status;
 
@@ -80,6 +90,14 @@ const deleteCart = async (req, res, next) => {
 
 const updateCartQuantities = async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
+
         const orderId = req.params.orderId;
         const status = req.query.status;
         const { productId, quantity, branchId } = req.body;
@@ -117,12 +135,20 @@ const updateCartQuantities = async (req, res, next) => {
     }
 }
 
-const getCartPrice = async (req, res, next) => {
+const getMainCartDetails = async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
+        
         const userId = req.params.userId;
         const status = req.query.status;
 
-        const result = await CartService.getCartPrice(userId, status);
+        const result = await CartService.getMainCartDetails(userId, status);
 
         if (!result) {
             throw {
@@ -155,5 +181,5 @@ module.exports = {
     getCart,
     deleteCart,
     updateCartQuantities,
-    getCartPrice,
+    getMainCartDetails
 }

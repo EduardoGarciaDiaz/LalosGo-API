@@ -8,11 +8,11 @@ branchSchema = new mongoose.Schema({
         unique: true
     },
     openingTime: {
-        type: String, //#Formato 24:00
+        type: String,
         required: true
     },
     closingTime: {
-        type: String, //#Formato 24:00
+        type: String,
         required: true,
     },
     address: {
@@ -21,7 +21,7 @@ branchSchema = new mongoose.Schema({
             required: true
         },
         number: {
-            type: Number,
+            type: String,
             required: true
         },
         cologne: {
@@ -45,7 +45,7 @@ branchSchema = new mongoose.Schema({
             required: true
         },
         internalNumber: {
-            type: Number,
+            type: String,
             required: false
         },
         location:{

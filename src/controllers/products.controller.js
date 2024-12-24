@@ -118,8 +118,48 @@ const getBranchProducts = async (req, res, next) => {
     }
 }
 
+const getProducts = async (req, res, next) => { 
+    try{
+        const products = await ProductsService.getProducts();
+
+        return res.status(200).send({
+            message: "Productos recuperados exitosamente",
+            products: products
+        });
+
+    } catch (error) {
+        if (error.status) {
+            return res.status(error.status).send({ message: error.message });
+        }
+        next(error);
+    }
+}
+
+const patchProduct = async (req, res, next) => {
+    try{
+
+        let productId = req.params.productId;
+        let {newStatus} = req.body;
+
+        const producStatusChanged = await ProductsService.patchProduct(productId, newStatus);
+
+        return res.status(200).send({
+            message: "Estado del producto actualizado exitosamente",
+            product: producStatusChanged
+        });
+
+    } catch (error) {
+        if(error.status){
+            return res.status(error.status).send({ message: error.message });
+        }
+        next(error);
+    }
+}
+
 module.exports = {
     createProduct,
     updateProductImage,
-    getBranchProducts
+    getBranchProducts, 
+    getProducts, 
+    patchProduct
 }
