@@ -4,16 +4,10 @@ const { default: mongoose } = require('mongoose');
 
 const postPaymentMethod = async (userId, newPaymentMethod) => {
     try {
-        //TODO: Validar que el Id sea válido
-
-        //TODO: Validar que la fecha de expiración sea válida
-
-        //TODO: Validar que No tenga 3 tarjetas YA registradas
 
         if (newPaymentMethod.cardNumber) {
-            const existingCard = await User.findOne({ 'paymentMethods.cardNumber': newPaymentMethod.cardNumber });
+            const existingCard = await User.findOne({ 'client.paymentMethods.cardNumber': newPaymentMethod.cardNumber });
 
-            //TODO: Validar que la tarjeta no esté registrada a el usuario
             if (existingCard && existingCard._id.toString() == userId) {
                 console.log('El método de pago ya está registrado.');
                 throw {
@@ -21,11 +15,6 @@ const postPaymentMethod = async (userId, newPaymentMethod) => {
                     message: "El método de pago ya está registrado."
                 };
             }
-
-            //TODO: Cifrar el CVV y numero de tarjeta
-            // if (newPaymentMethod.cvv !== null && newPaymentMethod && newPaymentMethod.trim() !== ''){
-            //     newPaymentMethod = await User.encryptCVV(newPaymentMethod.cvv);
-            // }
 
             const userFound = await User.findById(userId);
 
@@ -271,7 +260,6 @@ const findUserByEmailOrPhoneNumber = async (email, phone, username) => {
 const updateClientAccount = async (id, client) => {
     try {
         const userFound = await User.findById(id);
-        console.log(userFound.username);
         if(!userFound){
             throw {
                 status: 404,
@@ -317,6 +305,101 @@ const recoverPassword = async (userId, newPassword) => {
 }
 
 
+const postAddress = async (userId, newAddress) => {
+    try {
+        //Validar el id del usuario
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            throw {
+                status: 400,
+                message: "El id del usuario es inválido"
+            };
+        }
+
+        const userFound = await User.findById(userId);
+
+        if (!userFound) {
+            throw {
+                status: 404,
+                message: "Usuario no encontrado"
+            };
+        }
+        userFound.client.addresses.push(newAddress);
+
+        await userFound.save();
+        return newAddress;
+
+    } catch (error) {
+        if (error.status) {
+            throw {
+                status: error.status,
+                message: error.message
+            }
+        }
+        throw error;
+    }
+}
+
+
+const putAddress = async (userId, addressId, updatedPaymentMethod) => {
+    try {
+
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            console.log('El id del usuario es inválido');
+            throw {
+                status: 400,
+                message: "El id del usuario es inválido"
+            };
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(addressId)) {
+            console.log('El id de la dirección es inválido');
+            throw {
+                status: 400,
+                message: "El id de la dirección es inválido"
+            };
+        }
+
+        const userFound = await User.findById(userId);
+
+        if (!userFound) {
+            throw {
+                status: 404,
+                message: "Usuario no encontrado"
+            };
+        }
+
+        if (!userFound.client.addresses) {
+            console.log('El usuario no tiene direcciones asignadas');
+            throw {
+                status: 400,
+                message: "El usuario no tiene direcciones asignadas"
+            };
+        }
+
+        const addressFound = userFound.client.addresses.id(addressId);
+        if (!addressFound) {
+            throw {
+                status: 404,
+                message: "Método de pago no encontrado"
+            };
+        }
+
+        addressFound.set(updatedPaymentMethod);
+        await userFound.save();
+
+        return addressFound;
+    } catch (error) {
+        if (error.status) {
+            throw {
+                status: error.status,
+                message: error.message
+            }
+        }
+        throw error;
+    }
+}
+
+
 module.exports = {
     postPaymentMethod,
     getPaymentMethods,
@@ -327,5 +410,7 @@ module.exports = {
     recoverPassword,
     getUserLogin,
     getUser, 
-    findUserByEmailOrPhoneNumber
+    findUserByEmailOrPhoneNumber,
+    postAddress, 
+    putAddress
 }

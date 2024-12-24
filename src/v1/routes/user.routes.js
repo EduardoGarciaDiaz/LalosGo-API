@@ -18,7 +18,10 @@ router.delete('/:userId/payment-methods/:paymentMethodId',/*TODO: authorize('Cus
 router.post('/', userController.createClientAccount);
 router.put('/:id', /*authorize('customer'),*/  userController.updateClientAccount);
 router.patch('/:id', /*authorize('customer'),*/ userController.recoverPassword);
+
 router.get('/:userId/addresses', AddressController.getAddresses);
 router.put('/:userId/addresses', AddressController.updateCurrentAddresStatus)
+router.post('/:userId/addresses', userController.postAddress);
+router.put('/:userId/addresses/:addressId', userController.putAddress);
 
-module.exports = router;
+module.exports = router
