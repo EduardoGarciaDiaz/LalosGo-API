@@ -17,7 +17,7 @@ const createCartSchema = {
             errorMessage: 'Invalid Branch ID format'
         }
     },
-    'productForCart.product': {
+    'productForCart._id': {
         exists: {
             errorMessage: 'Product ID is required'
         },
