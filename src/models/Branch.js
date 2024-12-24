@@ -21,7 +21,7 @@ branchSchema = new mongoose.Schema({
             required: true
         },
         number: {
-            type: Number,
+            type: String,
             required: true
         },
         cologne: {
@@ -45,7 +45,7 @@ branchSchema = new mongoose.Schema({
             required: true
         },
         internalNumber: {
-            type: Number,
+            type: String,
             required: false
         },
         location:{

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../../controllers/users.controller');
+const AddressController = require('../../controllers/address.controller.js')
 const authorize = require('../../middlewares/auth.middleware');
 const { 
     validateCreatePaymentMethod,
@@ -17,6 +18,7 @@ router.delete('/:userId/payment-methods/:paymentMethodId',/*TODO: authorize('Cus
 router.post('/', userController.createClientAccount);
 router.put('/:id', /*authorize('customer'),*/  userController.updateClientAccount);
 router.patch('/:id', /*authorize('customer'),*/ userController.recoverPassword);
-router.get('/:userId/addresses', userController.getAddresses);
+router.get('/:userId/addresses', AddressController.getAddresses);
+router.put('/:userId/addresses', AddressController.updateCurrentAddresStatus)
 
 module.exports = router;

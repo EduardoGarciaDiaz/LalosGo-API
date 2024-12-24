@@ -312,10 +312,51 @@ async function isStockAvailable(newCartInfo) {
     }   
 }
 
+
+const validateCartProductsWithNewAddress = async (userId, newBranchId) => {
+    try {
+        const existingCart = await Order.findOne({ customer: userId, statusOrder: CART_STATUS });
+        if ( !existingCart || existingCart.branch !== newBranchId || existingCart.orderProducts.length === 0) {
+            throw { status: 200, message: "Productos del carrito actualizados correctamente" };
+        }
+
+        const updatedProducts = [];
+        for (const product of existingCart.orderProducts) {
+            try {
+                const isStockAvailable = await isStockAvailable({
+                    productId: product._id,
+                    quantity: product.quantity,
+                    branchId: newBranchId,
+                });
+    
+                if (!isStockAvailable.hasStock) {
+                    product.quantity = isStockAvailable.maxStock
+                }
+                updatedProducts.push(product);
+
+            } catch (error) {
+                
+            }            
+        }
+
+        existingCart.orderProducts = updatedProducts;
+        let updatedCart = await existingCart.save();
+
+        return updatedCart;
+    } catch (error) {
+        if (error.status) {
+            throw { status: error.status, message: error.message };
+        }
+        throw { status: 500, message: "Error interno del servidor" };
+    }
+};
+
+
 module.exports = { 
     getCart,
     deleteCart,
     updateCartQuantities,
     getMainCartDetails,
-    saveProductInCart
+    saveProductInCart,
+    validateCartProductsWithNewAddress
 }
