@@ -270,7 +270,6 @@ const getMainCartDetails = async (userId, status) => {
 async function isStockAvailable(newCartInfo) {
     try {
         const { productId, quantity, branchId } = newCartInfo;
-    
         const branch = await Branch.findOne(
             { 
                 _id: branchId,
@@ -316,21 +315,22 @@ async function isStockAvailable(newCartInfo) {
 const validateCartProductsWithNewAddress = async (userId, newBranchId) => {
     try {
         const existingCart = await Order.findOne({ customer: userId, statusOrder: CART_STATUS });
-        if ( !existingCart || existingCart.branch !== newBranchId || existingCart.orderProducts.length === 0) {
+        if (!existingCart || existingCart.branch == newBranchId || existingCart.orderProducts.length == 0) {
             throw { status: 200, message: "Productos del carrito actualizados correctamente" };
         }
 
         const updatedProducts = [];
         for (const product of existingCart.orderProducts) {
             try {
-                const isStockAvailable = await isStockAvailable({
-                    productId: product._id,
+                let stock = await isStockAvailable({
+                    productId: product.product,
                     quantity: product.quantity,
                     branchId: newBranchId,
                 });
-    
-                if (!isStockAvailable.hasStock) {
-                    product.quantity = isStockAvailable.maxStock
+                if (!stock.hasStock) {                    
+                    let unitPrice = product.price/product.quantity
+                    product.quantity = stock.maxStock
+                    product.price = stock.maxStock*unitPrice
                 }
                 updatedProducts.push(product);
 
@@ -338,8 +338,13 @@ const validateCartProductsWithNewAddress = async (userId, newBranchId) => {
                 
             }            
         }
-
+        let totalAmount = 0
+        updatedProducts.forEach(element => {
+            totalAmount += element.price
+        });
         existingCart.orderProducts = updatedProducts;
+        existingCart.branch = newBranchId
+        existingCart.totalPrice = totalAmount
         let updatedCart = await existingCart.save();
 
         return updatedCart;
