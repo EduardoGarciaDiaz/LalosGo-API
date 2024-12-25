@@ -1,10 +1,19 @@
 const BranchService = require('../services/branches.service')
+const { validationResult } = require('express-validator');
 
 const ACTIVE_BRANCH = true
 const INACTIVE_BANCH = false
 
 const createBranch = async(req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
+        
         const {name, openingTime, closingTime, address} = req.body
         const newBranch = {
             name, 
@@ -30,6 +39,14 @@ const createBranch = async(req, res, next) => {
 
 const editBranch = async(req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
+
         let {branchId} = req.params
         let {_id, name, openingTime, closingTime, address,branchStatus} = req.body
         let { changeStatus } = req.query
@@ -76,6 +93,14 @@ const editBranch = async(req, res, next) => {
 
 const consultBranches = async(req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
+
         let {recoverProduct} = req.query
         let {location} = req.query
         if (recoverProduct !== undefined && recoverProduct){
@@ -102,6 +127,14 @@ const consultBranches = async(req, res, next) => {
 
 const consultBranch = async(req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
+
         let { branchId } = req.params;
 
         let branch = await BranchService.consultBranch(branchId);
@@ -122,6 +155,14 @@ const consultBranch = async(req, res, next) => {
 
 const toggleBranchStatus = async(req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
+        
         let { branchId } = req.params
         let resultOperation = await BranchService.toggleBranchStatus(branchId);
         return res.status(200).send({
