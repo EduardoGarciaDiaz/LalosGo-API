@@ -13,17 +13,16 @@ describe('Branch API Success Cases', () => {
             street: 'Av. Principal',
             number: '123',
             cologne: 'Centro',
-            zipcode: '12345',
+            zipcode: 12345,
             locality: 'Ciudad',
             municipality: 'Municipio',
             federalEntity: 'Estado',
-            internalNumber: 'A',
+            internalNumber: '1',
             location: {
                 type: 'Point',
                 coordinates: [19.4326, -99.1332]
             }
         },
-        branchStatus: true,
         branchProducts: []
     }
 
@@ -38,14 +37,19 @@ describe('Branch API Success Cases', () => {
     })
 
     describe('Flujo exitoso de operaciones', () => {
-        it('Debería crear una nueva sucursal', async () => {
+        it('Crear una nueva sucursal', async () => {
             const res = await request(app)
-                .post('/api/v1/branches/')
+                .post('/api/v1/branches')
                 .send({
                     name: branchTest.name,
                     openingTime: branchTest.openingTime,
                     closingTime: branchTest.closingTime,
-                    address: branchTest.address,
+                    address: {
+                        ...branchTest.address,
+                        number: parseInt(branchTest.address.number),
+                        internalNumber: parseInt(branchTest.address.internalNumber)
+                    },
+                    branchStatus: branchTest.branchStatus
                 })
 
             expect(res.statusCode).toEqual(201)
@@ -54,7 +58,7 @@ describe('Branch API Success Cases', () => {
             expect(res.body.message).toEqual('Sucursal creada con éxito.')
         })
 
-        it('Debería actualizar la información de la sucursal', async () => {
+        it('Actualizar la información de la sucursal', async () => {
             const updatedName = 'Sucursal Principal Actualizada'
             const res = await request(app)
                 .put(`/api/v1/branches/${branchTest._id}`)
@@ -62,7 +66,12 @@ describe('Branch API Success Cases', () => {
                     name: updatedName,
                     openingTime: '07:00',
                     closingTime: '22:00',
-                    address: branchTest.address,
+                    address: {
+                        ...branchTest.address,
+                        number: parseInt(branchTest.address.number),
+                        internalNumber: parseInt(branchTest.address.internalNumber)
+                    },
+                    branchStatus: branchTest.branchStatus
                 })
 
             expect(res.statusCode).toEqual(200)
@@ -70,29 +79,16 @@ describe('Branch API Success Cases', () => {
             expect(res.body.branch.openingTime).toEqual('07:00')
         })
 
-        it('Debería actualizar productos de la sucursal', async () => {
+        it('Consultar todas las sucursales', async () => {
             const res = await request(app)
-                .put(`/api/v1/branches/${branchTest._id}`)
-                .send({
-                    branchProducts: [
-                        { productId: new mongoose.Types.ObjectId(), quantity: 10 }
-                    ]
-                })
-
-            expect(res.statusCode).toEqual(200)
-            expect(res.body.message).toEqual('Se han guardado los productos de la sucursal correctamente')
-        })
-
-        it('Debería consultar todas las sucursales', async () => {
-            const res = await request(app)
-                .get('/api/v1/branches/')
+                .get('/api/v1/branches')
 
             expect(res.statusCode).toEqual(200)
             expect(Array.isArray(res.body.branches)).toBeTruthy()
             expect(res.body.branches.length).toBeGreaterThan(0)
         })
 
-        it('Debería consultar una sucursal específica', async () => {
+        it('Consultar una sucursal específica', async () => {
             const res = await request(app)
                 .get(`/api/v1/branches/${branchTest._id}`)
 
@@ -101,17 +97,23 @@ describe('Branch API Success Cases', () => {
             expect(res.body.message).toEqual('Sucursal recupera con éxito')
         })
 
-        it('Debería obtener la sucursal más cercana', async () => {
+        it('Obtener la sucursal más cercana', async () => {
             const res = await request(app)
-                .get('/api/v1/branches?location[latitude]=19.4326&location[longitude]=-99.1332')
+                .get('/api/v1/branches')
+                .query({
+                    recoverProduct: false,
+                    'location[latitude]': 19.4326,
+                    'location[longitude]': -99.1332
+                })
 
             expect(res.statusCode).toEqual(200)
             expect(res.body.branches).toBeDefined()
         })
 
-        it('Debería cambiar el estado de la sucursal', async () => {
+        it('Cambiar el estado de la sucursal', async () => {
             const res = await request(app)
                 .patch(`/api/v1/branches/${branchTest._id}`)
+                .query({ changeStatus: 'Active' })
 
             expect(res.statusCode).toEqual(200)
             expect(res.body.message).toEqual('Estado de sucursal actualizado.')

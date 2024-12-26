@@ -41,6 +41,7 @@ const editBranch = async(req, res, next) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
+            console.log(errors.array())
             return res.status(400).json({
                 message: "Los datos proporcionados no son válidos",
                 errors: errors.array()
@@ -48,7 +49,7 @@ const editBranch = async(req, res, next) => {
         }
 
         let {branchId} = req.params
-        let {_id, name, openingTime, closingTime, address,branchStatus} = req.body
+        let {_id, name, openingTime, closingTime, address, branchStatus} = req.body
         let { changeStatus } = req.query
         let {branchProducts} = req.body
         let branchToUpdate = {

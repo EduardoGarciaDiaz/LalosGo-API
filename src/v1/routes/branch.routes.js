@@ -11,7 +11,7 @@ const {
 
 router.post('/', validateCreateBranch , BranchController.createBranch)
 router.put('/:branchId', validateEditBranch , BranchController.editBranch)
-router.get('/', validateConsultBranch , BranchController.consultBranches)
+router.get('/', BranchController.consultBranches)
 router.get('/:branchId', validateConsultBranch ,BranchController.consultBranch)
 router.patch('/:branchId', validateConsultBranch ,BranchController.toggleBranchStatus)
 

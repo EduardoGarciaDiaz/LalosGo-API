@@ -1,16 +1,5 @@
 const { checkSchema } = require('express-validator');
 
-const baseSchema = {
-    branchStatus: {
-        exists: {
-            errorMessage: 'Branch status is required'
-        },
-        isBoolean: {
-            errorMessage: 'Branch status must be a boolean'
-        }
-    }
-};
-
 const addressSchema = {
     'address.street': {
         exists: {
@@ -113,12 +102,12 @@ const addressSchema = {
                 if (!value.every(num => typeof num === 'number')) {
                     throw new Error('Coordinates must be numbers');
                 }
-                const [longitude, latitude] = value;
-                if (longitude < -180 || longitude > 180) {
-                    throw new Error('Longitude must be between -180 and 180');
-                }
+                const [latitude, longitude] = value;
                 if (latitude < -90 || latitude > 90) {
-                    throw new Error('Latitude must be between -90 and 90');
+                    throw new Error('latitude must be between -180 and 180');
+                }
+                if (longitude < -180 || longitude > 180) {
+                    throw new Error('longitude must be between -90 and 90');
                 }
                 return true;
             }
@@ -139,7 +128,6 @@ const branchIdParamSchema = {
 };
 
 const createBranchSchema = {
-    ...baseSchema,
     name: {
         exists: {
             errorMessage: 'Name is required'
@@ -174,7 +162,6 @@ const createBranchSchema = {
 
 const editBranchSchema = {
     ...branchIdParamSchema,
-    ...baseSchema,
     name: {
         optional: true,
         isString: {
@@ -225,7 +212,8 @@ const editBranchSchema = {
             options: [['Active', 'Inactive']],
             errorMessage: 'Status must be either Active or Inactive'
         }
-    }
+    },
+    ...addressSchema
 };
 
 const consultBranchSchema = {

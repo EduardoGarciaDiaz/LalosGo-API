@@ -40,7 +40,7 @@ describe('Branch API Failure Cases', () => {
     })
 
     describe('Casos de fallo esperados', () => {
-        it('Debería fallar al crear una sucursal con nombre duplicado', async () => {
+        it('Fallar al crear una sucursal con nombre duplicado', async () => {
             const res = await request(app)
                 .post('/api/v1/branches/')
                 .send({
@@ -52,7 +52,7 @@ describe('Branch API Failure Cases', () => {
             expect(res.body.message).toEqual('Ya existe una sucursal con ese nombre.')
         })
 
-        it('Debería fallar al actualizar una sucursal inexistente', async () => {
+        it('Fallar al actualizar una sucursal inexistente', async () => {
             const fakeId = new mongoose.Types.ObjectId()
             const res = await request(app)
                 .put(`/api/v1/branches/${fakeId}`)
@@ -68,7 +68,7 @@ describe('Branch API Failure Cases', () => {
             expect(res.body.message).toEqual('La sucursal que quieres editar no existe.')
         })
 
-        it('Debería fallar al actualizar con un nombre que ya existe', async () => {
+        it('Fallar al actualizar con un nombre que ya existe', async () => {
             const newBranch = await Branch.create({
                 name: 'Otra Sucursal',
                 openingTime: '09:00',
@@ -91,7 +91,7 @@ describe('Branch API Failure Cases', () => {
             expect(res.body.message).toEqual('Ya existe una sucursal con ese nombre.')
         })
 
-        it('Debería fallar al consultar una sucursal inexistente', async () => {
+        it('Fallar al consultar una sucursal inexistente', async () => {
             const fakeId = new mongoose.Types.ObjectId()
             const res = await request(app)
                 .get(`/api/v1/branches/${fakeId}`)
@@ -100,7 +100,7 @@ describe('Branch API Failure Cases', () => {
             expect(res.body.message).toContain('No se encontró la sucursal con el id')
         })
 
-        it('Debería fallar al buscar sucursal cercana sin ubicaciones disponibles', async () => {
+        it('Fallar al buscar sucursal cercana sin ubicaciones disponibles', async () => {
             await Branch.deleteMany({})
             const res = await request(app)
                 .get('/api/v1/branches?location[latitude]=0&location[longitude]=0')
@@ -109,7 +109,7 @@ describe('Branch API Failure Cases', () => {
             expect(res.body.message).toContain('No se encontraron sucursales registradas')
         })
 
-        it('Debería fallar al intentar cambiar estado de sucursal inexistente', async () => {
+        it('Fallar al intentar cambiar estado de sucursal inexistente', async () => {
             const fakeId = new mongoose.Types.ObjectId()
             const res = await request(app)
                 .patch(`/api/v1/branches/${fakeId}`)

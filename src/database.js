@@ -8,13 +8,17 @@ const DB_IP = process.env.DB_IP;
 const DB_PORT = process.env.DB_PORT;
 const DB_URL = process.env.DB_URL;
 
-// if (process.env.NODE_ENV == "development") {
+if (process.env.NODE_ENV == "development") {
     mongoose.connect(DB_URL)
     .then(db => console.log('Db is connected'))
     .catch(error => console.error('Error connecting to database:', error));
-// } else {
-//     mongoose.connect(`mongodb://${DB_USER}:${DB_PASSWORD}@${DB_IP}:${DB_PORT}/${DB_NAME}`)
-//     .then(db => console.log('Db is connected'))
-//     .catch(error => console.error('Error connecting to database:', error));
-// }
+} else if (process.env.NODE_ENV == "test") {
+    mongoose.connect(`${DB_URL}-test`)
+    .then(db => console.log('Db is connected'))
+    .catch(error => console.error('Error connecting to database:', error));
+} else {
+    mongoose.connect(`mongodb://${DB_USER}:${DB_PASSWORD}@${DB_IP}:${DB_PORT}/${DB_NAME}`)
+    .then(db => console.log('Db is connected'))
+    .catch(error => console.error('Error connecting to database:', error));
+}
 
