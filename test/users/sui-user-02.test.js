@@ -4,6 +4,8 @@ const mongoose = require('mongoose')
 const User = require('../../src/models/User')
 
 describe('User API Failure Cases', () => {
+    let authToken = ''
+
     let userClientTest = {
         _id: '',
         username: 'username',
@@ -51,19 +53,34 @@ describe('User API Failure Cases', () => {
         app.close()
     })
 
-    describe('Payment Methods', () => {
-        it('Create client account', async () => {
-            const res = await request(app)
-                .post('/api/v1/users')
-                .send(userClientTest)
-            expect(res.statusCode).toEqual(201)
-            userClientTest._id = res.body.newClientAccount._id
-        })
-    
+    it('Create client account', async () => {
+        const res = await request(app)
+            .post('/api/v1/users')
+            .send(userClientTest)
+        expect(res.statusCode).toEqual(201)
+        userClientTest._id = res.body.newClientAccount._id
+    })
+
+    it('Login user and get token', async () => {
+        const loginRes = await request(app)
+            .post('/api/v1/auth')
+            .send({
+                username: userClientTest.username,
+                password: userClientTest.password
+            });
+        
+        expect(loginRes.statusCode).toEqual(200);
+        expect(loginRes.body.token).toBeDefined();
+        authToken = loginRes.body.token;
+    });
+
+    describe('Payment Methods', () => {    
         it('Add payment method with invalid user Id', async () => {
             const res = await request(app)
                 .post(`/api/v1/users/1234/payment-methods`)
                 .send(paymentMethodTest)
+                .set('Authorization', `Bearer ${authToken}`)
+
             expect(res.statusCode).toEqual(400)
         })
 
@@ -71,6 +88,8 @@ describe('User API Failure Cases', () => {
             const res = await request(app)
                 .post(`/api/v1/users/${null}/payment-methods`)
                 .send(paymentMethodTest)
+                .set('Authorization', `Bearer ${authToken}`)
+
             expect(res.statusCode).toEqual(400)
         })
 
@@ -81,6 +100,8 @@ describe('User API Failure Cases', () => {
                     cardNumber: '4415712345678910',
                     cardEmitter: 'BBVA'
                 })
+                .set('Authorization', `Bearer ${authToken}`)
+
             expect(res.statusCode).toEqual(400)
         })
 
@@ -95,6 +116,8 @@ describe('User API Failure Cases', () => {
                 cardType: 'Débito',
                 paymentNetwork: 'MasterCard'
             })
+            .set('Authorization', `Bearer ${authToken}`)
+
             expect(res.statusCode).toEqual(400)
         })
 
@@ -109,6 +132,8 @@ describe('User API Failure Cases', () => {
                 cardType: 'Débito',
                 paymentNetwork: 'MasterCard'
             })
+            .set('Authorization', `Bearer ${authToken}`)
+
             expect(res.statusCode).toEqual(400)
         })
 
@@ -123,6 +148,8 @@ describe('User API Failure Cases', () => {
                 cardType: 'Débito',
                 paymentNetwork: 'MasterCard'
             })
+            .set('Authorization', `Bearer ${authToken}`)
+
             expect(res.statusCode).toEqual(400)
         })
 
@@ -137,6 +164,8 @@ describe('User API Failure Cases', () => {
                 cardType: 'Débito',
                 paymentNetwork: 'MasterCard'
             })
+            .set('Authorization', `Bearer ${authToken}`)
+
             expect(res.statusCode).toEqual(400)
         })
 
@@ -151,6 +180,8 @@ describe('User API Failure Cases', () => {
                 cardType: 'Deb',
                 paymentNetwork: 'MasterCard'
             })
+            .set('Authorization', `Bearer ${authToken}`)
+
             expect(res.statusCode).toEqual(400)
         })
 
@@ -165,12 +196,15 @@ describe('User API Failure Cases', () => {
                 cardType: 'Débito',
                 paymentNetwork: 'Aaamex'
             })
+            .set('Authorization', `Bearer ${authToken}`)
+
             expect(res.statusCode).toEqual(400)
         })
     
         it('Get payment methods with invalid ID', async () => {
             const res = await request(app)
                 .get(`/api/v1/users/12a4/payment-methods`)
+                .set('Authorization', `Bearer ${authToken}`)
 
             expect(res.statusCode).toEqual(400)
         })
@@ -178,7 +212,15 @@ describe('User API Failure Cases', () => {
         it('Delete payment method with invalid ID', async () => {
             const res = await request(app)
                 .delete(`/api/v1/users/${null}/payment-methods/${12222}`)
+                .set('Authorization', `Bearer ${authToken}`)
+
             expect(res.statusCode).toEqual(400)
+        })
+
+        it('Get payment methods without authorization', async () => {
+            const res = await request(app)
+                .get(`/api/v1/users/${userClientTest._id}/payment-methods`)
+            expect(res.statusCode).toEqual(401)
         })
     })
 })

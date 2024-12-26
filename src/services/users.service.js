@@ -190,7 +190,6 @@ const getUserLogin = async (username) => {
         }
 
         if (userFound.client) {
-
             return {
                 id: userFound._id.toString(),
                 username: userFound.username,

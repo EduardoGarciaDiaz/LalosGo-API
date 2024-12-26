@@ -4,14 +4,16 @@ const mongoose = require('mongoose')
 const User = require('../../src/models/User')
 
 describe('User API Success Cases', () => {
+    let authToken = ''
+
     let userClientTest = {
         _id: '',
-        username: 'username',
+        username: 'userTest',
         fullname: 'fullname',
         birthdate: new Date(),
         phone: 1234567890,
         email: 'email',
-        password: 'password',
+        password: 'SecureP@assw0rd',
         status: 'Active',
         client: {
             addresses: [{
@@ -51,19 +53,34 @@ describe('User API Success Cases', () => {
         app.close()
     })
 
+    it('Create client account', async () => {
+        const res = await request(app)
+            .post('/api/v1/users')
+            .send(userClientTest)
+        expect(res.statusCode).toEqual(201)
+        userClientTest._id = res.body.newClientAccount._id
+    })
+
+    it('Login user and get token', async () => {
+        const loginRes = await request(app)
+            .post('/api/v1/auth')
+            .send({
+                username: userClientTest.username,
+                password: userClientTest.password
+            });
+        
+        expect(loginRes.statusCode).toEqual(200);
+        expect(loginRes.body.token).toBeDefined();
+        authToken = loginRes.body.token;
+    });
+
     describe('Payment Methods', () => {
-        it('Create client account', async () => {
-            const res = await request(app)
-                .post('/api/v1/users')
-                .send(userClientTest)
-            expect(res.statusCode).toEqual(201)
-            userClientTest._id = res.body.newClientAccount._id
-        })
-    
+
         it('Add payment method', async () => {
             const res = await request(app)
                 .post(`/api/v1/users/${userClientTest._id}/payment-methods`)
                 .send(paymentMethodTest)
+                .set('Authorization', `Bearer ${authToken}`)
             expect(res.statusCode).toEqual(201)
             expect(res.body.newPaymentMethod.cardOwner).toEqual(paymentMethodTest.cardOwner)
             expect(res.body.newPaymentMethod.cardNumber).toEqual(paymentMethodTest.cardNumber)
@@ -78,6 +95,7 @@ describe('User API Success Cases', () => {
         it('Get payment methods', async () => {
             const res = await request(app)
                 .get(`/api/v1/users/${userClientTest._id}/payment-methods`)
+                .set('Authorization', `Bearer ${authToken}`)
             expect(res.statusCode).toEqual(200)
             expect(res.body.userPaymentMethods).toHaveLength(1)
             expect(res.body.userPaymentMethods[0].cardOwner).toEqual(paymentMethodTest.cardOwner)
@@ -91,6 +109,8 @@ describe('User API Success Cases', () => {
         it('Delete payment method', async () => {
             const res = await request(app)
                 .delete(`/api/v1/users/${userClientTest._id}/payment-methods/${paymentMethodTest._id}`)
+                .set('Authorization', `Bearer ${authToken}`)
+                
             expect(res.statusCode).toEqual(200)
         })
     })

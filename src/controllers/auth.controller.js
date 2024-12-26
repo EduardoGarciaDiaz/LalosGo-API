@@ -18,7 +18,7 @@ self.login = async function (req, res, next) {
         if (!match) {
             return res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
         }
-        let token = generateToken(data.id, data.email, data.fullname);
+        let token = generateToken(data.id, data.email, data.fullname, data.role);
         res.status(200).json({
             id: data.id.toString(),
             username: data.username,
