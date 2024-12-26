@@ -36,8 +36,8 @@ describe('Branch API Success Cases', () => {
         app.close()
     })
 
-    describe('Flujo exitoso de operaciones', () => {
-        it('Crear una nueva sucursal', async () => {
+    describe('Success actions', () => {
+        it('Create branch', async () => {
             const res = await request(app)
                 .post('/api/v1/branches')
                 .send({
@@ -58,7 +58,7 @@ describe('Branch API Success Cases', () => {
             expect(res.body.message).toEqual('Sucursal creada con éxito.')
         })
 
-        it('Actualizar la información de la sucursal', async () => {
+        it('Update branch data', async () => {
             const updatedName = 'Sucursal Principal Actualizada'
             const res = await request(app)
                 .put(`/api/v1/branches/${branchTest._id}`)
@@ -79,7 +79,7 @@ describe('Branch API Success Cases', () => {
             expect(res.body.branch.openingTime).toEqual('07:00')
         })
 
-        it('Consultar todas las sucursales', async () => {
+        it('Get all branches', async () => {
             const res = await request(app)
                 .get('/api/v1/branches')
 
@@ -88,7 +88,7 @@ describe('Branch API Success Cases', () => {
             expect(res.body.branches.length).toBeGreaterThan(0)
         })
 
-        it('Consultar una sucursal específica', async () => {
+        it('Get specific branch', async () => {
             const res = await request(app)
                 .get(`/api/v1/branches/${branchTest._id}`)
 
@@ -97,7 +97,7 @@ describe('Branch API Success Cases', () => {
             expect(res.body.message).toEqual('Sucursal recupera con éxito')
         })
 
-        it('Obtener la sucursal más cercana', async () => {
+        it('Get nearest branch', async () => {
             const res = await request(app)
                 .get('/api/v1/branches')
                 .query({
@@ -110,7 +110,7 @@ describe('Branch API Success Cases', () => {
             expect(res.body.branches).toBeDefined()
         })
 
-        it('Cambiar el estado de la sucursal', async () => {
+        it('Change branch status', async () => {
             const res = await request(app)
                 .patch(`/api/v1/branches/${branchTest._id}`)
                 .query({ changeStatus: 'Active' })

@@ -14,8 +14,8 @@ describe('Branch API Invalid Input Cases', () => {
         app.close()
     })
 
-    describe('Entradas inválidas', () => {
-        it('Fallar al crear sucursal con horarios inválidos', async () => {
+    describe('Invalid Input Cases', () => {
+        it('Fail to create branch with invalid hours', async () => {
             const res = await request(app)
                 .post('/api/v1/branches/')
                 .send({
@@ -41,7 +41,7 @@ describe('Branch API Invalid Input Cases', () => {
             expect(res.statusCode).toEqual(400)
         })
 
-        it('Fallar al crear sucursal sin dirección completa', async () => {
+        it('Fail to create branch with incomplete address', async () => {
             const res = await request(app)
                 .post('/api/v1/branches/')
                 .send({
@@ -57,7 +57,7 @@ describe('Branch API Invalid Input Cases', () => {
             expect(res.statusCode).toEqual(400)
         })
 
-        it('Fallar al actualizar con coordenadas inválidas', async () => {
+        it('Fail to update branch with invalid coordinates', async () => {
             const branch = await Branch.create({
                 name: 'Sucursal Test Coordenadas',
                 branchStatus: true,
@@ -93,21 +93,21 @@ describe('Branch API Invalid Input Cases', () => {
             expect(res.statusCode).toEqual(400)
         })
 
-        it('Fallar al buscar con parámetros de ubicación inválidos', async () => {
+        it('Fail to fetch branch with invalid location parameters', async () => {
             const res = await request(app)
                 .get('/api/v1/branches?location[latitude]=invalid&location[longitude]=invalid')
 
             expect(res.statusCode).toEqual(400)
         })
 
-        it('Fallar al enviar ID de sucursal con formato inválido', async () => {
+        it('Fail to fetch branch with invalid ID format', async () => {
             const res = await request(app)
                 .get('/api/v1/branches/invalid-id')
 
             expect(res.statusCode).toEqual(400)
         })
 
-        it('Fallar al actualizar productos con cantidades negativas', async () => {
+        it('Fail to update products with negative quantities', async () => {
             const branch = await Branch.create({
                 name: 'Sucursal Test Productos', 
                 branchStatus: true,
@@ -139,7 +139,7 @@ describe('Branch API Invalid Input Cases', () => {
             expect(res.statusCode).toEqual(400)
         })
 
-        it('Fallar al enviar datos con tipos incorrectos', async () => {
+        it('Fail to create branch with incorrect data types', async () => {
             const res = await request(app)
                 .post('/api/v1/branches/')
                 .send({

@@ -13,9 +13,9 @@ const saveNewProduct = async(newProduct) => {
             }
         }
         let productToSave = new ProductSchema(newProduct)
-        let savedProduct = productToSave.save()
+        let savedProduct = await productToSave.save()
+        
         return savedProduct
-         
     } catch (error) {
         if(error.status){
             throw{
