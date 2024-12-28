@@ -207,7 +207,8 @@ const getUserLogin = async (username) => {
                 fullname: userFound.fullname,
                 role: userFound.employee.role,
                 password: userFound.password,
-                email: userFound.email
+                email: userFound.email,
+                status: userFound.status
             };
         }
         throw {
