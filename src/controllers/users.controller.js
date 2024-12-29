@@ -174,13 +174,7 @@ const createClientAccount = async (req, res, next) => {
             message: "Cuenta de cliente creada correctamente",
             newClientAccount: result
         });
-<<<<<<< HEAD
     }catch (error) {
-=======
-    } catch (error) {
-
-        console.log(error)
->>>>>>> 44c569101b35ed060f3cdd89767ccd7d90f39c64
         if (error.status) {
             return res
                 .status(error.status)
