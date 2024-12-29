@@ -104,11 +104,14 @@ const consultBranches = async(req, res, next) => {
 
         let {recoverProduct} = req.query
         let {location} = req.query
+        let {productId} = req.params
         if (recoverProduct !== undefined && recoverProduct){
             resultOperation = await BranchService.consultBranches(true)
         } else if (location) {
             resultOperation  = await BranchService.getNearestBranch(location)
-        } else {
+        } else if(productId){
+            resultOperation = await BranchService.getBranchesWithSpecificProduct(productId)
+        } else{
             resultOperation = await BranchService.consultBranches(false)
     
         }

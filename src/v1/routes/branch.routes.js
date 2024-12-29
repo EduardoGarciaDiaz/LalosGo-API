@@ -13,7 +13,9 @@ const {
 router.post('/', authorize('Administrator'), validateCreateBranch, BranchController.createBranch)
 router.put('/:branchId', authorize('Administrator'), validateEditBranch, BranchController.editBranch)
 router.get('/', BranchController.consultBranches)
+router.get('/:productId', BranchController.consultBranches)
 router.get('/:branchId', authorize('Administrator, Customer'), validateConsultBranch, BranchController.consultBranch)
 router.patch('/:branchId', authorize('Administrator'), validateToggleBranchStatus, BranchController.toggleBranchStatus)
+
 
 module.exports = router

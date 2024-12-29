@@ -222,6 +222,7 @@ const patchProduct = async(productId, productStatus) => {
 }
 
 
+
 module.exports = {
     saveNewProduct,
     saveProductInBranch,
