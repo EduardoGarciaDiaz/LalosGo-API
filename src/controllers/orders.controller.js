@@ -29,7 +29,7 @@ self.cartToOrder = async (req, res, next) => {
         }
 
         let finalPrice = 0;
-        let cartPrice = await CartService.getCartPrice(customer, status);
+        let cartPrice = await CartService.getMainCartDetails(customer, status);
         finalPrice = cartPrice.totalPrice;
 
         const orderDetails = {

@@ -15,7 +15,7 @@ const saveBranch = async (branch) => {
         }
 
         let newBranch = new BranchSchema(branch)
-        let savedBranch = newBranch.save()
+        let savedBranch = await newBranch.save();
         let foundBranch = await BranchSchema.findById(savedBranch._id)
         return foundBranch;
     } catch (error) {

@@ -102,6 +102,13 @@ const addressSchema = {
                 if (!value.every(num => typeof num === 'number')) {
                     throw new Error('Coordinates must be numbers');
                 }
+                const [latitude, longitude] = value;
+                if (latitude < -90 || latitude > 90) {
+                    throw new Error('latitude must be between -180 and 180');
+                }
+                if (longitude < -180 || longitude > 180) {
+                    throw new Error('longitude must be between -90 and 90');
+                }
                 return true;
             }
         }
@@ -185,14 +192,16 @@ const editBranchSchema = {
         },
         custom: {
             options: (value) => {
-                if (!value.every(item => 
-                    item.product && 
-                    typeof item.quantity === 'number' && 
-                    item.quantity >= 0
-                )) {
-                    throw new Error('Invalid branch products format');
-                }
-                return true;
+                if (!Array.isArray(value)) return false;
+                return value.every(item => {
+                    if (!item.productId || !mongoose.Types.ObjectId.isValid(item.productId)) {
+                        throw new Error('Invalid product ID');
+                    }
+                    if (typeof item.quantity !== 'number' || item.quantity < 0) {
+                        throw new Error('Quantity must be a positive number');
+                    }
+                    return true;
+                });
             }
         }
     },
@@ -203,7 +212,8 @@ const editBranchSchema = {
             options: [['Active', 'Inactive']],
             errorMessage: 'Status must be either Active or Inactive'
         }
-    }
+    },
+    ...addressSchema
 };
 
 const consultBranchSchema = {

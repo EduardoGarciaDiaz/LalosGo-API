@@ -102,8 +102,13 @@ const updateProductImage = async (req, res, next) => {
 
 const getBranchProducts = async (req, res, next) => {
     try {
-        let {branchId} = req.params
-        let productsOfBranch = await ProductService.consultBranchProducts(branchId)
+        let {branchId, categoryId} = req.params
+        let productsOfBranch
+        if(categoryId){
+            productsOfBranch = await ProductService.consultBranchProductsByCategory(branchId, categoryId)
+        }else{
+            productsOfBranch = await ProductService.consultBranchProducts(branchId)
+        }
     
         return res.status(201).send({
             message: `Productos de la sucursal recuperados exitosamente`,

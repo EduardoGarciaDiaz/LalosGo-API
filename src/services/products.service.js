@@ -13,9 +13,9 @@ const saveNewProduct = async(newProduct) => {
             }
         }
         let productToSave = new ProductSchema(newProduct)
-        let savedProduct = productToSave.save()
+        let savedProduct = await productToSave.save()
+        
         return savedProduct
-         
     } catch (error) {
         if(error.status){
             throw{
@@ -106,6 +106,7 @@ const consultBranchProducts = async(branchId) => {
     try {
         let  foundBranches  = await BranchSchema.findById(branchId).populate({
             path:'branchProducts.product',
+            match: { productStatus: true},
             populate: {
                 path: 'category',
                 model: 'categories'
@@ -156,6 +157,42 @@ const getProducts = async () => {
 
 }
 
+const consultBranchProductsByCategory = async (branchId, categoryId) => {
+    try {
+        if (!branchId || !categoryId) {
+            throw {
+                status: 400,
+                message: "branchId y categoryId son requeridos"
+            };
+        }
+
+        const foundBranch = await BranchSchema.findById(branchId).populate({
+            path: 'branchProducts.product',
+            match: { productStatus: true, category: categoryId },
+            populate: {
+                path: 'category',
+                model: 'categories'
+            }
+        });
+
+        if (!foundBranch || !foundBranch.branchProducts || foundBranch.branchProducts.length === 0) {
+            throw {
+                status: 404,
+                message: "No se encontraron productos"
+            };
+        }
+        const filteredProducts = foundBranch.branchProducts.filter(bp => bp.product);
+
+        return filteredProducts;
+
+    } catch (error) {
+        throw error.status
+            ? { status: error.status, message: error.message }
+            : { status: 500, message: "Error interno del servidor" };
+    }
+};
+
+
 const patchProduct = async(productId, productStatus) => {
     try {
        const updateProduct = await Product.findByIdAndUpdate(
@@ -191,5 +228,6 @@ module.exports = {
     saveProductImage,
     consultBranchProducts, 
     getProducts, 
-    patchProduct
+    patchProduct,
+    consultBranchProductsByCategory
 }
