@@ -159,6 +159,41 @@ const consultBranch = async (branchId) => {
     }
 }
 
+const getBranchesWithSpecificProduct = async (productId) => {
+    try {
+        let branches = await BranchSchema.aggregate([
+            {
+                $addFields: {
+                    filteredProducts: {
+                        $filter: {
+                            input: "$branchProducts",
+                            as: "product",
+                            cond: { $eq: ["$$product.product", new mongoose.Types.ObjectId(productId)] }
+                        }
+                    }
+                }
+            },
+            {
+                $addFields: {
+                    branchProducts: "$filteredProducts" 
+                }
+            },
+            {
+                $project: {
+                    filteredProducts: 0 
+                }
+            }
+        ]);
+        return branches;
+    } catch (error) {
+        console.error("Error fetching branches:", error);
+        throw error;
+    }
+};
+
+
+
+
 const toggleBranchStatus = async (branchId, newStatus) => {
     try {
         const branchFound = await BranchSchema.findById(branchId);
@@ -252,6 +287,7 @@ module.exports = {
     consultBranch,
     toggleBranchStatus,
     getNearestBranch,
+    getBranchesWithSpecificProduct
 }
 
 
