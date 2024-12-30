@@ -3,19 +3,63 @@ const ProductSchema = require('../models/Product')
 const BranchSchema = require('../models/Branch')
 const Product = require('../models/Product')
 
-const saveNewProduct = async(newProduct) => {
+const saveproductToUpdate = async(productToUpdate) => {
     try {
-        let repetedProdcut = await ProductSchema.findOne({$or: [{_id: newProduct._id}, {name: newProduct.name}, {barCode: newProduct.barCode}]})
+        let repetedProdcut = await ProductSchema.findOne({$or: [{_id: productToUpdate._id}, {name: productToUpdate.name}, {barCode: productToUpdate.barCode}]})
         if(repetedProdcut){
             throw{
                 status: 400,
                 message: "El producto ya se encuentra registrado."
             }
         }
-        let productToSave = new ProductSchema(newProduct)
+        let productToSave = new ProductSchema(productToUpdate)
         let savedProduct = await productToSave.save()
         
         return savedProduct
+    } catch (error) {
+        if(error.status){
+            throw{
+                status: error.status,
+                message: error.message
+            }
+        }
+        throw error
+    }
+}
+
+const updateProduct = async(productToUpdate) => {
+    try {
+        let foundProduct = await ProductSchema.findOne({$or: [{_id: productToUpdate._id}, {barCode: productToUpdate.barCode}]})
+        if(!foundProduct){
+            throw{
+                status: 400,
+                message: "El producto no se encuentra registrado."
+            }
+        }
+        
+        let savedProduct = await ProductSchema.findByIdAndUpdate(
+            foundProduct._id, 
+            {
+                $set:{
+                    name: productToUpdate.name,
+                    description: productToUpdate.description,
+                    unitPrice: productToUpdate.unitPrice,
+                    expirateDate: productToUpdate.expirateDate,
+                    weigth: productToUpdate.weigth,
+                    limit: productToUpdate.limit,
+                    unitMeasure: productToUpdate.unitMeasure,
+                    category: productToUpdate.category
+                }
+            },
+        );
+        if(savedProduct){
+            return savedProduct
+        }
+
+        throw{
+            status: 400,
+            message: "El producto no se pudo actualizar."
+        }
     } catch (error) {
         if(error.status){
             throw{
@@ -68,14 +112,6 @@ const saveProductInBranch = async (branches, productToAdd) => {
         }
         const updatedBranches = await Promise.all(
             branches.map(async (branchToUpdate) => {
-                /*let foundBranch = await BranchSchema.findById(branchToUpdate.id);
-                if (!foundBranch) {
-                    throw {
-                        status: 404,
-                        message: `La sucursal ${branchToUpdate.name} no existe.`,
-                    };
-                }*/
-
                 return await BranchSchema.findByIdAndUpdate(
                     branchToUpdate.id,
                     {
@@ -101,6 +137,63 @@ const saveProductInBranch = async (branches, productToAdd) => {
         throw error;
     }
 };
+
+const updateProductInBranches = async (branches, productToUpdate) => {
+    try {
+        if (!Array.isArray(branches)) {
+            throw {
+                status: 400,
+                message: "El parámetro 'branches' debe ser un arreglo de objetos.",
+            };
+        }
+
+        const updatedBranches = await Promise.all(
+            branches.map(async (branchToUpdate) => {
+                const branch = await BranchSchema.findById(branchToUpdate.id);
+
+                if (!branch) {
+                    throw {
+                        status: 404,
+                        message: `La rama con ID ${branchToUpdate.id} no fue encontrada.`,
+                    };
+                }
+
+                const existingProductIndex = branch.branchProducts.findIndex(
+                    (item) => item.product.toString() === productToUpdate.id.toString()
+                );
+
+                if (existingProductIndex !== -1) {
+                    branch.branchProducts[existingProductIndex].quantity =
+                        branchToUpdate.quantity || 0;
+                } else {
+                    branch.branchProducts.push({
+                        product: productToUpdate.id,
+                        quantity: branchToUpdate.quantity || 0,
+                    });
+                }
+                return await branch.save();
+            })
+        );
+
+        const branchIds = branches.map((branch) => branch.id);
+        await BranchSchema.updateMany(
+            { _id: { $nin: branchIds }, "branchProducts.product": productToUpdate.id },
+            { $pull: { branchProducts: { product: productToUpdate.id } } }
+        );
+
+        return updatedBranches;
+    } catch (error) {
+        if (error.status) {
+            throw {
+                status: error.status,
+                message: error.message,
+            };
+        }
+        throw error;
+    }
+};
+
+
 
 const consultBranchProducts = async(branchId) => {
     try {
@@ -221,14 +314,39 @@ const patchProduct = async(productId, productStatus) => {
     }
 }
 
+const getProductById = async (productId) => {
+    try{
+        const product = await ProductSchema.findById(productId).populate('category')
 
+        if (!product || product.length === 0) {
+            throw {
+                status: 404,
+                message: "No se encontraron productos registrados"
+            }
+        }
+
+        return product
+    } catch (error) {
+        if (error.status) {
+            throw {
+                status: error.status,
+                message: error.message
+            }
+        }
+        throw error
+    }
+
+}
 
 module.exports = {
-    saveNewProduct,
+    saveproductToUpdate,
     saveProductInBranch,
     saveProductImage,
     consultBranchProducts, 
     getProducts, 
     patchProduct,
-    consultBranchProductsByCategory
+    consultBranchProductsByCategory,
+    updateProductInBranches,
+    updateProduct,
+    getProductById
 }
