@@ -4,16 +4,10 @@ const { default: mongoose } = require('mongoose');
 
 const postPaymentMethod = async (userId, newPaymentMethod) => {
     try {
-        //TODO: Validar que el Id sea válido
-
-        //TODO: Validar que la fecha de expiración sea válida
-
-        //TODO: Validar que No tenga 3 tarjetas YA registradas
 
         if (newPaymentMethod.cardNumber) {
-            const existingCard = await User.findOne({ 'paymentMethods.cardNumber': newPaymentMethod.cardNumber });
+            const existingCard = await User.findOne({ 'client.paymentMethods.cardNumber': newPaymentMethod.cardNumber });
 
-            //TODO: Validar que la tarjeta no esté registrada a el usuario
             if (existingCard && existingCard._id.toString() == userId) {
                 console.log('El método de pago ya está registrado.');
                 throw {
@@ -21,11 +15,6 @@ const postPaymentMethod = async (userId, newPaymentMethod) => {
                     message: "El método de pago ya está registrado."
                 };
             }
-
-            //TODO: Cifrar el CVV y numero de tarjeta
-            // if (newPaymentMethod.cvv !== null && newPaymentMethod && newPaymentMethod.trim() !== ''){
-            //     newPaymentMethod = await User.encryptCVV(newPaymentMethod.cvv);
-            // }
 
             const userFound = await User.findById(userId);
 
@@ -201,7 +190,6 @@ const getUserLogin = async (username) => {
         }
 
         if (userFound.client) {
-
             return {
                 id: userFound._id.toString(),
                 username: userFound.username,
@@ -219,7 +207,8 @@ const getUserLogin = async (username) => {
                 fullname: userFound.fullname,
                 role: userFound.employee.role,
                 password: userFound.password,
-                email: userFound.email
+                email: userFound.email,
+                status: userFound.status
             };
         }
         throw {
@@ -329,33 +318,6 @@ const recoverPassword = async (userId, newPassword) => {
     }
 }
 
-const getAddresses = async (userId) => {
-    try {
-        //TODO: Validar que el Id sea válido
-
-        const userFound = await User.findById(userId);
-
-        if (!userFound) {
-            throw {
-                status: 404,
-                message: "Usuario no encontrado"
-            };
-        }
-
-        const addresses = userFound.client.addresses;
-
-        return addresses;
-
-    } catch (error) {
-        if (error.status) {
-            throw {
-                status: error.status,
-                message: error.message
-            }
-        }
-        throw error;
-    }
-}
 
 const postAddress = async (userId, newAddress) => {
     try {
@@ -463,7 +425,6 @@ module.exports = {
     getUserLogin,
     getUser, 
     findUserByEmailOrPhoneNumber,
-    getAddresses, 
     postAddress, 
     putAddress, 
     findUserByEmail

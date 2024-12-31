@@ -270,7 +270,6 @@ const getMainCartDetails = async (userId, status) => {
 async function isStockAvailable(newCartInfo) {
     try {
         const { productId, quantity, branchId } = newCartInfo;
-    
         const branch = await Branch.findOne(
             { 
                 _id: branchId,
@@ -312,10 +311,57 @@ async function isStockAvailable(newCartInfo) {
     }   
 }
 
+
+const validateCartProductsWithNewAddress = async (userId, newBranchId) => {
+    try {
+        const existingCart = await Order.findOne({ customer: userId, statusOrder: CART_STATUS });
+        if (!existingCart || existingCart.branch == newBranchId || existingCart.orderProducts.length == 0) {
+            throw { status: 200, message: "Productos del carrito actualizados correctamente" };
+        }
+
+        const updatedProducts = [];
+        for (const product of existingCart.orderProducts) {
+            try {
+                let stock = await isStockAvailable({
+                    productId: product.product,
+                    quantity: product.quantity,
+                    branchId: newBranchId,
+                });
+                if (!stock.hasStock) {                    
+                    let unitPrice = product.price/product.quantity
+                    product.quantity = stock.maxStock
+                    product.price = stock.maxStock*unitPrice
+                }
+                updatedProducts.push(product);
+
+            } catch (error) {
+                
+            }            
+        }
+        let totalAmount = 0
+        updatedProducts.forEach(element => {
+            totalAmount += element.price
+        });
+        existingCart.orderProducts = updatedProducts;
+        existingCart.branch = newBranchId
+        existingCart.totalPrice = totalAmount
+        let updatedCart = await existingCart.save();
+
+        return updatedCart;
+    } catch (error) {
+        if (error.status) {
+            throw { status: error.status, message: error.message };
+        }
+        throw { status: 500, message: "Error interno del servidor" };
+    }
+};
+
+
 module.exports = { 
     getCart,
     deleteCart,
     updateCartQuantities,
     getMainCartDetails,
-    saveProductInCart
+    saveProductInCart,
+    validateCartProductsWithNewAddress
 }

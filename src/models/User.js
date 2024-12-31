@@ -39,9 +39,9 @@ const clientSchema = new mongoose.Schema({
         latitude: {
             type: Number,
             required: true
-        }, 
+        },
         longitude: {
-            type: Number, 
+            type: Number,
             required: true
         },
         isCurrentAddress: {
@@ -49,7 +49,7 @@ const clientSchema = new mongoose.Schema({
         }
     }],
     paymentMethods: [{
-        cardOwner: { 
+        cardOwner: {
             type: String,
             required: true
         },
@@ -75,7 +75,7 @@ const clientSchema = new mongoose.Schema({
             enum: ['Visa', 'MasterCard'],
             required: true
         }
-    }]    
+    }]
 })
 
 
@@ -83,17 +83,16 @@ const clientSchema = new mongoose.Schema({
 const employeeSchema = new mongoose.Schema({
     role: {
         type: String,
-        enum:['Manager', 'Delivery Person', 'Sales Executive' ],
+        enum: ['Manager', 'Delivery Person', 'Sales Executive', 'Administrator'],
         required: true
     },
-    hiredDate:{
-        type : Date,
+    hiredDate: {
+        type: Date,
         required: true,
     },
     branch: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'branches',
-        required: true
+        ref: 'branches'
     }
 })
 
@@ -129,10 +128,10 @@ userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true
-    },   
+    },
     status: {
         type: String,
-        enum:['Active', 'Inactive'],
+        enum: ['Active', 'Inactive'],
         required: true,
     },
     client: {
@@ -140,12 +139,12 @@ userSchema = new mongoose.Schema({
     },
     employee: {
         type: employeeSchema,
-    }    
+    }
 },
-{
-    timestamps: true,
-    versionKey: false
-})
+    {
+        timestamps: true,
+        versionKey: false
+    })
 
 
 

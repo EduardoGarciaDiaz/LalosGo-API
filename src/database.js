@@ -12,6 +12,10 @@ if (process.env.NODE_ENV == "development") {
     mongoose.connect(DB_URL)
     .then(db => console.log('Db is connected'))
     .catch(error => console.error('Error connecting to database:', error));
+} else if (process.env.NODE_ENV == "test") {
+    mongoose.connect(`${DB_URL}-test`)
+    .then(db => console.log('Db is connected'))
+    .catch(error => console.error('Error connecting to database:', error));
 } else {
     mongoose.connect(`mongodb://${DB_USER}:${DB_PASSWORD}@${DB_IP}:${DB_PORT}/${DB_NAME}`)
     .then(db => console.log('Db is connected'))

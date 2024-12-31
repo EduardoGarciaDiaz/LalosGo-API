@@ -52,11 +52,11 @@ const paymentMethodSchema = {
         },
         custom: {
             options: (value) => {
-                const [month, year] = value.split('/');
+                const [year, month] = value.split('-');
                 const expirationDate = new Date(year, month - 1);
                 const now = new Date();
-                if (expirationDate < now) {
-                    throw new Error('Card has expired');
+                if (expirationDate < now || expirationDate.getFullYear() > now.getFullYear() + 10) {
+                    throw new Error('Card date not valid');
                 }
                 return true;
             }

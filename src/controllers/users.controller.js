@@ -264,28 +264,7 @@ const recoverPassword = async (req, res, next) => {
 }
 
 
-const getAddresses = async (req, res, next) => {
-    try {
-        const userId = req.params.userId;
-        if (!userId || userId === null || userId === '') {
-            return res.status(400).send({ error: `El id del usuario '${userId}' viene nulo o vacío` })
-        }
 
-        const result = await UserService.getAddresses(userId);
-
-        return res.status(200).send({
-            message: "Direcciones recuperadas",
-            addresses: result
-        });
-    } catch (error) {
-        if (error.status) {
-            return res
-                .status(error.status)
-                .send({ message: error.message });
-        }
-        next(error)
-    }
-}
 
 const postAddress = async (req, res, next) => {
     try {
@@ -421,7 +400,6 @@ module.exports = {
     createClientAccount,
     updateClientAccount,
     recoverPassword,
-    getAddresses, 
     postAddress, 
     putAddress, 
     sendEmail

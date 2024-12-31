@@ -5,6 +5,7 @@ const swaggerUi = require('swagger-ui-express')
 const swaggerFile = require('../swagger-output.json')
 const cors = require('cors');
 dotenv.config();
+require('./libs/initialSetup')
 require('./database')
 
 const PORT = process.env.SERVER_PORT || 3000
@@ -26,6 +27,4 @@ const server = app.listen(PORT, '0.0.0.0', () => {
 
 
 
-module.exports = {
-    server    
-}
+module.exports = server    
