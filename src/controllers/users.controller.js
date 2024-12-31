@@ -2,6 +2,8 @@ const UserService = require('../services/users.service');
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const { validationResult } = require('express-validator');
+const { Resend } = require('resend');
+require('dotenv').config();
 
 const postPaymentMethod = async (req, res, next) => {
     try {
@@ -241,7 +243,9 @@ const recoverPassword = async (req, res, next) => {
             });
         }
 
-        const result = await UserService.recoverPassword(userId, newPassword);
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+        const result = await UserService.recoverPassword(userId, hashedPassword);
 
         return res.status(200).send({
             message: "La contraseña ha sido actualizada correctamente",
@@ -369,6 +373,44 @@ const putAddress = async (req, res, next) => {
     }
 }
 
+const sendEmail = async (req, res, next) => {
+    try {
+        const {confirmationCode, email} = req.body;
+
+        const user = await UserService.findUserByEmail(email);
+
+        if (!user) {
+            return res.status(404).send({message: "El email no existe"});
+        } else {
+            console.log(user);
+        }
+
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        (async function () {
+            await resend.emails.send({
+              from: 'Acme <onboarding@resend.dev>',
+              to: [email],
+              subject: 'Prueba envío código',
+              html: `<p>El código de confirmación es: ${confirmationCode}</p>`,
+            });
+          })();
+
+        const id = user._id;
+        return res.status(200).send({
+            message: "Se ha enviado el correo correctamente",
+            userId: id
+        });
+
+    }catch (error) {
+        if (error.status) {
+            return res
+                .status(error.status)
+                .send({message: error.message});
+        }
+        next(error)
+    }
+}
+
 
 
 module.exports = {
@@ -381,5 +423,6 @@ module.exports = {
     recoverPassword,
     getAddresses, 
     postAddress, 
-    putAddress
+    putAddress, 
+    sendEmail
 }

@@ -267,6 +267,20 @@ const findUserByEmailOrPhoneNumber = async (email, phone, username) => {
     }
 };
 
+const findUserByEmail = async (email) => {
+    try {
+        console.log(email);
+        const user = await User.findOne({email})
+        console.log(user);
+        return user;
+    } catch (error) {
+        throw {
+            status: error.status || 500, 
+            message: error.message || "Error al buscar usuario por email"
+        }
+    }
+};
+
 
 const updateClientAccount = async (id, client) => {
     try {
@@ -278,7 +292,7 @@ const updateClientAccount = async (id, client) => {
             };
         }
 
-        +userFound.set(client);
+        userFound.set(client);
         await userFound.save();
 
         return userFound;
@@ -292,7 +306,7 @@ const updateClientAccount = async (id, client) => {
 
 const recoverPassword = async (userId, newPassword) => {
     try {
-        const userFound = await User.findOne(userId);
+        const userFound = await User.findById(userId);
 
         if (!userFound) {
             throw {
@@ -301,7 +315,7 @@ const recoverPassword = async (userId, newPassword) => {
             };
         }
 
-        userFound.password.set(newPassword);
+        userFound.password = newPassword
         userFound.save();
         return userFound;
     } catch (error) {
@@ -451,5 +465,6 @@ module.exports = {
     findUserByEmailOrPhoneNumber,
     getAddresses, 
     postAddress, 
-    putAddress
+    putAddress, 
+    findUserByEmail
 }
