@@ -88,7 +88,7 @@ EmployeesService.saveEmployee = async function (employee) {
     }
 };
 
-EmployeesService.updateEmployee = async function (id, employee, isStatusChanged) {
+EmployeesService.updateEmployee = async function (id, employee) {
     try {
         const repeatedEmployee = await User.findOne({
             $or: [
@@ -110,11 +110,7 @@ EmployeesService.updateEmployee = async function (id, employee, isStatusChanged)
             { $set: employee },
             { new: true }
         );
-
-        if (isStatusChanged) {
-            await updateEmployeeStatus(employee);
-        }
-
+        
         const updatedEmployee = await User.findById(id).select('-password');
         return updatedEmployee;
     } catch (error) {

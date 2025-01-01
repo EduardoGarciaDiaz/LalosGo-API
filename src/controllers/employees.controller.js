@@ -47,9 +47,8 @@ self.update = async function (req, res, next) {
     try {
         const { id } = req.params;
         const employee = req.body;
-        const { changeStatus } = req.query;
         await EmployeesService.getEmployee(id);
-        const data = await EmployeesService.updateEmployee(id, employee, changeStatus);
+        const data = await EmployeesService.updateEmployee(id, employee);
         return res.status(200).json(data);
     } catch (error) {
         next(error);
