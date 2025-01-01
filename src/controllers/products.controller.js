@@ -55,7 +55,6 @@ const createProductImage = async (req, res, next) => {
         let productId = req.params.productId;
         upload(req, res, async (err) => {
             if (err) {
-                console.log("Error con Multer:", err);
                 return next({ status: 500, message: "Error al subir la imagen, puede intentarlo desde el apartado -Edicion Producto-" });
             }
             const imageFile = req.file;
@@ -108,7 +107,6 @@ const editProductImage = async (req, res, next) => {
         const productId = req.params.productId;
         upload(req, res, async (err) => {
             if (err) {
-                console.error("Error con Multer:", err);
                 return next({ status: 500, message: "Error al subir la imagen, puede intentarlo desde el apartado -Edición Producto-" });
             }
 

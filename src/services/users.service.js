@@ -10,7 +10,6 @@ const postPaymentMethod = async (userId, newPaymentMethod) => {
             const existingCard = await User.findOne({ 'client.paymentMethods.cardNumber': newPaymentMethod.cardNumber });
 
             if (existingCard && existingCard._id.toString() == userId) {
-                console.log('El método de pago ya está registrado.');
                 throw {
                     status: 400,
                     message: "El método de pago ya está registrado."
@@ -259,9 +258,7 @@ const findUserByEmailOrPhoneNumber = async (email, phone, username) => {
 
 const findUserByEmail = async (email) => {
     try {
-        console.log(email);
         const user = await User.findOne({email})
-        console.log(user);
         return user;
     } catch (error) {
         throw {
@@ -359,7 +356,6 @@ const putAddress = async (userId, addressId, updatedPaymentMethod) => {
     try {
 
         if (!mongoose.Types.ObjectId.isValid(userId)) {
-            console.log('El id del usuario es inválido');
             throw {
                 status: 400,
                 message: "El id del usuario es inválido"
@@ -367,7 +363,6 @@ const putAddress = async (userId, addressId, updatedPaymentMethod) => {
         }
 
         if (!mongoose.Types.ObjectId.isValid(addressId)) {
-            console.log('El id de la dirección es inválido');
             throw {
                 status: 400,
                 message: "El id de la dirección es inválido"
@@ -384,7 +379,6 @@ const putAddress = async (userId, addressId, updatedPaymentMethod) => {
         }
 
         if (!userFound.client.addresses) {
-            console.log('El usuario no tiene direcciones asignadas');
             throw {
                 status: 400,
                 message: "El usuario no tiene direcciones asignadas"
