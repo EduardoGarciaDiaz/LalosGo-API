@@ -41,7 +41,6 @@ const editBranch = async(req, res, next) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            console.log(errors.array())
             return res.status(400).json({
                 message: "Los datos proporcionados no son válidos",
                 errors: errors.array()

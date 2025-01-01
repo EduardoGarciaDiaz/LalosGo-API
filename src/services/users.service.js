@@ -1,6 +1,7 @@
 const { raw } = require('express');
 const User = require('../models/User');
 const { default: mongoose } = require('mongoose');
+const { get } = require('../controllers/orders.controller');
 
 const postPaymentMethod = async (userId, newPaymentMethod) => {
     try {
@@ -9,7 +10,6 @@ const postPaymentMethod = async (userId, newPaymentMethod) => {
             const existingCard = await User.findOne({ 'client.paymentMethods.cardNumber': newPaymentMethod.cardNumber });
 
             if (existingCard && existingCard._id.toString() == userId) {
-                console.log('El método de pago ya está registrado.');
                 throw {
                     status: 400,
                     message: "El método de pago ya está registrado."
@@ -258,9 +258,7 @@ const findUserByEmailOrPhoneNumber = async (email, phone, username) => {
 
 const findUserByEmail = async (email) => {
     try {
-        console.log(email);
         const user = await User.findOne({email})
-        console.log(user);
         return user;
     } catch (error) {
         throw {
