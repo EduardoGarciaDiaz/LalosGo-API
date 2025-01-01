@@ -128,7 +128,7 @@ EmployeesService.updateEmployee = async function (id, employee, isStatusChanged)
     }
 };
 
-async function updateEmployeeStatus(employee) {
+EmployeesService.updateEmployeeStatus = async function (employee) {
     try {
         let status = employee.status === 'Active' ? 'Inactive' : 'Active';
         await User.findOneAndUpdate({ _id: employee._id }, { $set: { status: status } });

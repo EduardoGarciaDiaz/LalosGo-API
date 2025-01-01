@@ -49,13 +49,22 @@ self.update = async function (req, res, next) {
         const employee = req.body;
         const { changeStatus } = req.query;
         await EmployeesService.getEmployee(id);
-        const passwordHash = bcrypt.hashSync(employee.password, 10);
-        employee.password = passwordHash;
         const data = await EmployeesService.updateEmployee(id, employee, changeStatus);
         return res.status(200).json(data);
     } catch (error) {
         next(error);
     }
 };
+
+self.updateStatus = async function (req, res, next) {
+    try {
+        const { id } = req.params;
+        const employee = await EmployeesService.getEmployee(id);
+        const data = await EmployeesService.updateEmployeeStatus(employee);
+        return res.status(200).json(data);
+    } catch (error) {
+        next(error);
+    }
+}
 
 module.exports = self;

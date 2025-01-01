@@ -10,4 +10,6 @@ router.post('/', authorize('Administrator'), employees.create);
 
 router.put('/:id', authorize('Administrator'), employees.update);
 
+router.patch('/:id', authorize('Administrator'), employees.updateStatus);
+
 module.exports = router;
