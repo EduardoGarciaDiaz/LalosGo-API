@@ -1,16 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const ProductsController = require('../../controllers/products.controller.js');
+const authorize = require('../../middlewares/auth.middleware');
 
-//router.get('/', ProductsController.getAllProducts);
-router.post('/', ProductsController.createProduct)
-router.put('/:productId', ProductsController.editProduct)
-router.post('/:productId/images', ProductsController.createProductImage)
-router.put('/:productId/images', ProductsController.editProductImage)
-router.get('/:branchId', ProductsController.getBranchProducts)
-router.get('/:branchId/:categoryId', ProductsController.getBranchProducts)
-router.get('/', ProductsController.getProducts)
-router.patch('/:productId', ProductsController.patchProduct)
+router.post('/',authorize('Administrator'), ProductsController.createProduct)
+router.put('/:productId', authorize('Administrator'), ProductsController.editProduct)
+router.post('/:productId/images', authorize('Administrator'), ProductsController.createProductImage)
+router.put('/:productId/images', authorize('Administrator'), ProductsController.editProductImage)
+router.get('/:branchId', authorize('Administrator,Customer'), ProductsController.getBranchProducts)
+router.get('/:branchId/:categoryId', authorize('Administrator,Customer'), ProductsController.getBranchProducts)
+router.get('/', authorize('Administrator'), ProductsController.getProducts)
+router.patch('/:productId', authorize('Administrator,Customer'), ProductsController.patchProduct)
 
 
 module.exports = router

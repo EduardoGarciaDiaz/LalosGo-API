@@ -103,7 +103,7 @@ const consultBranches = async(req, res, next) => {
 
         let {recoverProduct} = req.query
         let {location} = req.query
-        let {productId} = req.params
+        let {productId} = req.query
         if (recoverProduct !== undefined && recoverProduct){
             resultOperation = await BranchService.consultBranches(true)
         } else if (location) {
@@ -141,7 +141,6 @@ const consultBranch = async(req, res, next) => {
         let { branchId } = req.params;
 
         let branch = await BranchService.consultBranch(branchId);
-        
         return res.status(200).send({
             message: "Sucursal recupera con éxito",
             branch: branch
