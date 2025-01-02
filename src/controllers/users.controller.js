@@ -19,8 +19,6 @@ const postPaymentMethod = async (req, res, next) => {
 
         const { cardOwner, cardNumber, cardEmitter, expirationDate, cardType, paymentNetwork } = req.body;
 
-        //TODO: Validar campos no nulos o vacios
-
         const newPaymentMethod = {
             cardOwner,
             cardNumber,
@@ -201,8 +199,6 @@ const updateClientAccount = async (req, res, next) => {
             birthdate,
             phone
         }
-
-        console.log(updateClientAccount.username);
 
         const result = await UserService.updateClientAccount(userId, updateClientAccount);
         return res.status(200).send({
