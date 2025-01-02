@@ -13,8 +13,8 @@ const createProductSchema = {
             errorMessage: 'Bar code cannot be empty'
         },
         isLength: {
-            options: { min: 8, max: 13 },
-            errorMessage: 'Bar code must be between 8 and 13 characters'
+            options: { min: 12, max: 12 },
+            errorMessage: 'Bar code must be between a 12 characters code'
         }
     },
     name: {
@@ -122,14 +122,28 @@ const createProductSchema = {
     'branches.*': {
         exists: {
             errorMessage: 'At least one branch is required'
+        }
+    },
+    'branches.*.id': {
+        exists: {
+            errorMessage: 'At least one branch is required'
         },
         isMongoId: {
             errorMessage: 'Invalid branch ID format'
         }
+    },
+    'branches.*.quantity': {
+        exists: {
+            errorMessage: 'At least one branch is required'
+        },
+        isInt: {
+            options: { min: 1 },
+            errorMessage: 'Quantity must be a positive integer'
+        }
     }
 };
 
-const updateProductImageSchema = {
+const createProductImageSchema = {
     productId: {
         in: ['params'],
         exists: {
@@ -146,12 +160,10 @@ const updateProductImageSchema = {
                 if (!req.file) {
                     throw new Error('Image file is required');
                 }
-                // Validar tipos de archivo permitidos
                 const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
                 if (!allowedTypes.includes(req.file.mimetype)) {
                     throw new Error('Only JPEG, PNG and JPG files are allowed');
                 }
-                // Validar tamaño máximo (5MB)
                 const maxSize = 5 * 1024 * 1024;
                 if (req.file.size > maxSize) {
                     throw new Error('File size cannot exceed 5MB');
@@ -161,6 +173,7 @@ const updateProductImageSchema = {
         }
     }
 };
+
 
 const getBranchProductsSchema = {
     branchId: {
@@ -174,8 +187,52 @@ const getBranchProductsSchema = {
     }
 };
 
+const getBranchProductsByCategorySchema = {
+    branchId: {
+        in: ['params'],
+        exists: {
+            errorMessage: 'Branch ID is required'
+        },
+        isMongoId: {
+            errorMessage: 'Invalid branch ID format'
+        }
+    },
+    categoryId: {
+        in: ['params'],
+        exists: {
+            errorMessage: 'Category ID is required'
+        },
+        isMongoId: {
+            errorMessage: 'Invalid category ID format'
+        }
+    }
+
+};
+
+const editProductStatusSchema = {
+    productId: {
+        in: ['params'],
+        exists: {
+            errorMessage: 'product ID is required'
+        },
+        isMongoId: {
+            errorMessage: 'Invalid product ID format'
+        }
+    },
+    newStatus: {
+        optional: false,
+        isBoolean: {
+            errorMessage: 'new status  status must be a boolean'
+        }
+    }
+}
+
 module.exports = {
     validateCreateProduct: checkSchema(createProductSchema),
-    validateUpdateProductImage: checkSchema(updateProductImageSchema),
-    validateGetBranchProducts: checkSchema(getBranchProductsSchema)
+    validateEditProduct : checkSchema(createProductSchema),
+    validateCreateProductImage: checkSchema(createProductImageSchema),
+    validateEditProductImage: checkSchema(createProductImageSchema),
+    validateGetBranchProducts: checkSchema(getBranchProductsSchema),
+    validateGetBranchProductsByCategoryId: checkSchema(getBranchProductsByCategorySchema),
+    validatePatchProductSatus: checkSchema(editProductStatusSchema)
 };
