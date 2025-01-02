@@ -3,16 +3,16 @@ const ProductSchema = require('../models/Product')
 const BranchSchema = require('../models/Branch')
 const Product = require('../models/Product')
 
-const saveproductToUpdate = async(productToUpdate) => {
+const saveNewProduct = async(newProduct) => {
     try {
-        let repetedProdcut = await ProductSchema.findOne({$or: [{_id: productToUpdate._id}, {name: productToUpdate.name}, {barCode: productToUpdate.barCode}]})
+        let repetedProdcut = await ProductSchema.findOne({$or: [{_id: newProduct._id}, {name: newProduct.name}, {barCode: newProduct.barCode}]})
         if(repetedProdcut){
             throw{
                 status: 400,
                 message: "El producto ya se encuentra registrado."
             }
         }
-        let productToSave = new ProductSchema(productToUpdate)
+        let productToSave = new ProductSchema(newProduct)
         let savedProduct = await productToSave.save()
         
         return savedProduct
@@ -339,7 +339,7 @@ const getProductById = async (productId) => {
 }
 
 module.exports = {
-    saveproductToUpdate,
+    saveNewProduct,
     saveProductInBranch,
     saveProductImage,
     consultBranchProducts, 
