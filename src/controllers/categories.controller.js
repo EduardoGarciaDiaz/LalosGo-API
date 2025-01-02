@@ -1,7 +1,16 @@
 const CategoriesService = require('../services/categories.service')
+const { validationResult } = require('express-validator');
 
 const createCategory = async(req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
+
         const {identifier, name, categoryStatus} = req.body
         resultOperation = await CategoriesService.saveCategory(identifier, name)
         
@@ -21,6 +30,14 @@ const createCategory = async(req, res, next) => {
 
 const editCategory = async(req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
+
         const _id = req.params.categoryId
         const {changeStatus} = req.query;
         const {identifier, name, categoryStatus} =  req.body
@@ -62,6 +79,14 @@ const editCategory = async(req, res, next) => {
 
 const consultCategories = async(req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
+
         let resultOperation = await CategoriesService.consultCategories()
 
         return res.status(200).send({

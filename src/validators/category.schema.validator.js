@@ -29,8 +29,8 @@ const createCategorySchema = {
         custom: {
             options: (value) => {
                 // Agrega el formato requerido para el identificador
-                if (!/^[a-zA-Z0-9-_]+$/.test(value)) {
-                    throw new Error('Identifier can only contain letters, numbers, hyphens and underscores');
+                if (!/^[a-zA-Z0-9]+$/.test(value)) {
+                    throw new Error('Identifier can only contain letters, numbers');
                 }
                 return true;
             }
@@ -73,8 +73,8 @@ const editCategorySchema = {
         trim: true,
         custom: {
             options: (value) => {
-                if (!/^[a-zA-Z0-9-_]+$/.test(value)) {
-                    throw new Error('Identifier can only contain letters, numbers, hyphens and underscores');
+                if (!/^[a-zA-Z0-9]+$/.test(value)) {
+                    throw new Error('Identifier can only contain letters, numbers.');
                 }
                 return true;
             }
@@ -103,9 +103,8 @@ const editCategorySchema = {
     changeStatus: {
         optional: true,
         in: ['query'],
-        isIn: {
-            options: [['Active', 'Inactive']],
-            errorMessage: 'Status must be either Active or Inactive'
+        isBoolean: {
+            errorMessage: 'Category status must be a boolean'
         }
     }
 };
