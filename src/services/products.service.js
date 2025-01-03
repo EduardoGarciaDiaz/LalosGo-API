@@ -213,6 +213,8 @@ const consultBranchProducts = async(branchId) => {
             }
         }
 
+        foundBranches.branchProducts = foundBranches.branchProducts.filter(bp => bp.product !== null);
+
         return foundBranches;
 
     } catch (error) {
