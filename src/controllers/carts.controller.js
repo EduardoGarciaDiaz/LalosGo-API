@@ -110,7 +110,7 @@ const updateCartQuantities = async (req, res, next) => {
 
         let result;
         
-        if (status === 'reserved') {
+        if (status == 'reserved') {
             result = await CartService.updateCartQuantities(orderId, status, newCartInfo);
         }
 

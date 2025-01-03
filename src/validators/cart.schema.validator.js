@@ -122,7 +122,7 @@ const updateCartQuantitiesSchema = {
             errorMessage: 'Quantity is required'
         },
         isInt: {
-            options: { min: 1 },
+            options: { min: 0 },
             errorMessage: 'Quantity must be a positive integer'
         }
     },
