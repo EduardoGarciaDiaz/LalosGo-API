@@ -1,9 +1,32 @@
 const request = require('supertest')
 const app = require('../../src/index')
 const mongoose = require('mongoose')
+const bcrypt = require('bcrypt');
 const Branch = require('../../src/models/Branch')
+const User = require('../../src/models/User')
 
 describe('Branch API Success Cases', () => {
+    let authToken = ''
+    let adminUser = null
+
+    const TEST_PASSWORD = 'AdminTest_001'
+    const SALT_ROUNDS = 10;
+
+
+    const createAdminUserData = async () => ({
+        username: 'adminUnitTests',
+        fullname: 'User Admin Unit Tests',
+        birthdate: new Date('1990-01-01'),
+        phone: '2288445511',
+        email: 'admintest01@gmail.com',
+        password: await bcrypt.hash(TEST_PASSWORD, SALT_ROUNDS),
+        status: 'Active',
+        employee: {
+            role: 'Administrator',
+            hiredDate: new Date()
+        }
+    })
+
     let branchTest = {
         _id: '',
         name: 'Sucursal Principal',
@@ -28,12 +51,33 @@ describe('Branch API Success Cases', () => {
 
     beforeAll(async () => {
         await Branch.deleteMany({})
+        await User.deleteMany({})
+        const userData = await createAdminUserData()
+        adminUser = await User.create(userData)
     })
 
     afterAll(async () => {
         await Branch.deleteMany({})
+        await User.deleteMany({})
         await mongoose.disconnect()
         app.close()
+    })
+
+    it('Authentication', async () => {
+        const loginRes = await request(app)
+            .post('/api/v1/auth')
+            .send({
+                username: adminUser.username,
+                password: TEST_PASSWORD
+            });
+
+        expect(loginRes.statusCode).toEqual(200);
+        expect(loginRes.body.token).toBeDefined();
+        expect(loginRes.body).toHaveProperty('token')
+        expect(typeof loginRes.body.token).toBe('string')
+        expect(loginRes.body.token).not.toBe('')
+
+        authToken = loginRes.body.token;
     })
 
     describe('Success actions', () => {
@@ -51,6 +95,7 @@ describe('Branch API Success Cases', () => {
                     },
                     branchStatus: branchTest.branchStatus
                 })
+                .set('Authorization', `Bearer ${authToken}`)
 
             expect(res.statusCode).toEqual(201)
             expect(res.body.branch.name).toEqual(branchTest.name)
@@ -73,6 +118,7 @@ describe('Branch API Success Cases', () => {
                     },
                     branchStatus: branchTest.branchStatus
                 })
+                .set('Authorization', `Bearer ${authToken}`)
 
             expect(res.statusCode).toEqual(200)
             expect(res.body.branch.name).toEqual(updatedName)
@@ -82,6 +128,7 @@ describe('Branch API Success Cases', () => {
         it('Get all branches', async () => {
             const res = await request(app)
                 .get('/api/v1/branches')
+                .set('Authorization', `Bearer ${authToken}`)
 
             expect(res.statusCode).toEqual(200)
             expect(Array.isArray(res.body.branches)).toBeTruthy()
@@ -91,6 +138,7 @@ describe('Branch API Success Cases', () => {
         it('Get specific branch', async () => {
             const res = await request(app)
                 .get(`/api/v1/branches/${branchTest._id}`)
+                .set('Authorization', `Bearer ${authToken}`)
 
             expect(res.statusCode).toEqual(200)
             expect(res.body.branch._id).toEqual(branchTest._id)
@@ -105,6 +153,7 @@ describe('Branch API Success Cases', () => {
                     'location[latitude]': 19.4326,
                     'location[longitude]': -99.1332
                 })
+                .set('Authorization', `Bearer ${authToken}`)
 
             expect(res.statusCode).toEqual(200)
             expect(res.body.branches).toBeDefined()
@@ -114,6 +163,7 @@ describe('Branch API Success Cases', () => {
             const res = await request(app)
                 .patch(`/api/v1/branches/${branchTest._id}`)
                 .query({ changeStatus: 'Active' })
+                .set('Authorization', `Bearer ${authToken}`)
 
             expect(res.statusCode).toEqual(200)
             expect(res.body.message).toEqual('Estado de sucursal actualizado.')
