@@ -24,8 +24,8 @@ router.delete('/:userId/payment-methods/:paymentMethodId', authorize('Customer')
 router.post('/', validateCreateClientAccount, userController.createClientAccount);
 router.put('/:id', authorize('Customer'), validateUpdateClientAccount, userController.updateClientAccount);
 router.patch('/:userId/password',validateRecoverPassword, userController.recoverPassword);
-router.get('/:userId/addresses', AddressController.getAddresses);
-router.put('/:userId/addresses', AddressController.updateCurrentAddresStatus)
+router.get('/:userId/addresses', authorize('Customer'), AddressController.getAddresses);
+router.put('/:userId/addresses', authorize('Customer'), AddressController.updateCurrentAddresStatus)
 router.post('/:userId/addresses', authorize('Customer'), AddressController.postAddress);
 router.put('/:userId/addresses/:addressId', authorize('Customer'), AddressController.putAddress);
 router.post('/password', userController.sendEmail)

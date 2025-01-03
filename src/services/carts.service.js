@@ -4,12 +4,12 @@ const Branch = require('../models/Branch');
 const CART_STATUS = 'reserved';
 const SHIPPING_COST = 50;
 
-const saveProductInCart = async(userId, productForCart, branchId) => {
+const saveProductInCart = async (userId, productForCart, branchId) => {
     try {
-        let existingCart = await Order.findOne({customer: userId, statusOrder: CART_STATUS})
+        let existingCart = await Order.findOne({ customer: userId, statusOrder: CART_STATUS })
         let result
-        if(existingCart){
-            if(existingCart.branch != branchId){
+        if (existingCart) {
+            if (existingCart.branch != branchId) {
                 throw {
                     status: 400,
                     message: "No se puede agregar el producto debido a que el carrito no pertence a esa sucursal."
@@ -17,57 +17,57 @@ const saveProductInCart = async(userId, productForCart, branchId) => {
             }
 
             const existingProduct = existingCart.orderProducts.find((element) => element.product.toString() === productForCart._id.toString())
-            if(existingProduct){
-                let productDemand = Number(existingProduct.quantity)+Number(productForCart.quantity)
-                let stockAvailabie = await isStockAvailable({productId:productForCart._id, quantity: productDemand, branchId: branchId})
-                if(!stockAvailabie.hasStock){
+            if (existingProduct) {
+                let productDemand = Number(existingProduct.quantity) + Number(productForCart.quantity)
+                let stockAvailabie = await isStockAvailable({ productId: productForCart._id, quantity: productDemand, branchId: branchId })
+                if (!stockAvailabie.hasStock) {
                     throw {
                         status: 400,
                         message: `No se puede agregar el producto debido a que se alcanzó el limite: ${stockAvailabie.maxStock}.`
                     }
-                }                 
-                 existingProduct.quantity += Number(productForCart.quantity);
-                 existingProduct.price += Number(productForCart.price);
-                 existingCart.totalPrice += Number(productForCart.price);
-                 result = await existingCart.save();
-            }else{
-                let stockAvailabie = await isStockAvailable({productId:productForCart._id, quantity: productForCart.quantity, branchId: branchId})
-                if(!stockAvailabie.hasStock){
+                }
+                existingProduct.quantity += Number(productForCart.quantity);
+                existingProduct.price += Number(productForCart.price);
+                existingCart.totalPrice += Number(productForCart.price);
+                result = await existingCart.save();
+            } else {
+                let stockAvailabie = await isStockAvailable({ productId: productForCart._id, quantity: productForCart.quantity, branchId: branchId })
+                if (!stockAvailabie.hasStock) {
                     throw {
                         status: 400,
                         message: `No se puede agregar el producto debido a que se alcanzó el limite: ${stockAvailabie.maxStock}.`
                     }
-                } 
+                }
                 existingCart.orderProducts.push({
                     product: productForCart._id,
                     quantity: Number(productForCart.quantity),
                     price: Number(productForCart.price)
-                });            
+                });
                 existingCart.totalPrice += productForCart.price;
                 result = await existingCart.save();
-            }            
-            
-        }else{
-            let stockAvailabie = await isStockAvailable({productId:productForCart._id, quantity: productForCart.quantity, branchId: branchId})
-            if(!stockAvailabie.hasStock){
+            }
+
+        } else {
+            let stockAvailabie = await isStockAvailable({ productId: productForCart._id, quantity: productForCart.quantity, branchId: branchId })
+            if (!stockAvailabie.hasStock) {
                 throw {
                     status: 400,
                     message: `No se puede agregar el producto debido a que se alcanzó el limite: ${stockAvailabie.maxStock}.`
                 }
-            } 
-           let newCart = new Order({
+            }
+            let newCart = new Order({
                 orderNumber: generateOrderNumber(userId),
                 totalPrice: Number(productForCart.price),
                 branch: branchId,
-                orderProducts :[{
+                orderProducts: [{
                     product: productForCart._id,
                     quantity: Number(productForCart.quantity),
                     price: Number(productForCart.price)
-                }],                
+                }],
                 customer: userId,
                 statusOrder: CART_STATUS
-           })
-           result = await newCart.save()
+            })
+            result = await newCart.save()
         }
         return result
     } catch (error) {
@@ -84,16 +84,16 @@ const saveProductInCart = async(userId, productForCart, branchId) => {
 
 function generateOrderNumber(id) {
     const fecha = new Date();
-    const fechaFormato = 
-        fecha.getFullYear().toString() + 
-        (fecha.getMonth() + 1).toString().padStart(2, '0') + 
+    const fechaFormato =
+        fecha.getFullYear().toString() +
+        (fecha.getMonth() + 1).toString().padStart(2, '0') +
         fecha.getDate().toString().padStart(2, '0') +
         fecha.getHours().toString().padStart(2, '0') +
         fecha.getMinutes().toString().padStart(2, '0') +
         fecha.getSeconds().toString().padStart(2, '0');
-    const numericId = id.substring(1,6).replace(/\D/g, ''); 
+    const numericId = id.substring(1, 6).replace(/\D/g, '');
     const orderNumber = Number(`${fechaFormato}${numericId}`);
-    
+
     return orderNumber;
 }
 
@@ -106,16 +106,17 @@ const getCart = async (userId, status) => {
         if (status !== undefined && status === CART_STATUS) {
 
             const cartOrder = await Order.findOne({ customer: userId, statusOrder: status })
-            .populate([
-                { path: 'orderProducts.product' },
-                { path: 'branch', 
-                    select: 'address'
-                },
-                {
-                    path: 'customer',
-                    select: 'client.addresses'
-                }
-            ]);            
+                .populate([
+                    { path: 'orderProducts.product' },
+                    {
+                        path: 'branch',
+                        select: 'address'
+                    },
+                    {
+                        path: 'customer',
+                        select: 'client.addresses'
+                    }
+                ]);
 
             return cartOrder;
         }
@@ -156,17 +157,35 @@ const updateCartQuantities = async (orderId, status, newCartInfo) => {
                 .populate({
                     path: 'orderProducts.product',
                 });
-            
+
             if (cartOrder.orderProducts.length > 0) {
                 const productIndex = cartOrder.orderProducts.findIndex(
                     product => product.product._id.toString() === productId.toString()
                 );
-                                
+
                 if (productIndex >= 0) {
-                    if (quantity > 0) {
+                    if (quantity >= 0) {
+
+                        if (quantity === 0) {
+                            cartOrder.orderProducts.splice(productIndex, 1);
+                            await cartOrder.save();
+
+                            if (cartOrder.orderProducts.length === 0) {
+                                await cartOrder.deleteOne();
+                                return { cart: "Carrito eliminado" };
+                            }
+
+                            const updatedCart = await Order.findById(cartOrder._id)
+                            .populate({
+                                path: 'orderProducts.product',
+                            });
+
+                            return { cart: updatedCart };
+                        }
+
                         const stockResult = await isStockAvailable(newCartInfo);
                         const currentProduct = cartOrder.orderProducts[productIndex].product;
-                        
+
                         if (stockResult.maxStock === 0) {
                             cartOrder.orderProducts.splice(productIndex, 1);
                         } else if (stockResult.hasStock) {
@@ -179,7 +198,7 @@ const updateCartQuantities = async (orderId, status, newCartInfo) => {
                         } else {
                             cartOrder.orderProducts[productIndex].quantity = stockResult.maxStock;
                         }
-                        
+
                         await cartOrder.save();
 
                         if (cartOrder.orderProducts.length === 0) {
@@ -191,11 +210,11 @@ const updateCartQuantities = async (orderId, status, newCartInfo) => {
                             .populate({
                                 path: 'orderProducts.product',
                             });
-                        
-                        return {cart: updatedCart, maxStock: stockResult.maxStock, hasStock: stockResult.hasStock};
+
+                        return { cart: updatedCart, maxStock: stockResult.maxStock, hasStock: stockResult.hasStock };
                     }
                 }
-            }             
+            }
         }
     } catch (error) {
         if (error.status) {
@@ -217,20 +236,20 @@ const getMainCartDetails = async (userId, status) => {
             };
         }
 
-        const cart = await Order.findOne({ 
+        const cart = await Order.findOne({
             customer: userId,
             statusOrder: status
         })
-        .populate([
-            {
-                path: 'branch',
-                select: 'address'
-            },
-            {
-                path: 'customer',
-                select: 'client.addresses'
-            }
-        ]);
+            .populate([
+                {
+                    path: 'branch',
+                    select: 'address'
+                },
+                {
+                    path: 'customer',
+                    select: 'client.addresses'
+                }
+            ]);
 
         if (!cart) {
             throw {
@@ -255,7 +274,7 @@ const getMainCartDetails = async (userId, status) => {
             branchAddress: cart.branch.address,
             clientAddresses: cart.customer.client.addresses
         }
-            
+
     } catch (error) {
         if (error.status) {
             throw {
@@ -271,12 +290,12 @@ async function isStockAvailable(newCartInfo) {
     try {
         const { productId, quantity, branchId } = newCartInfo;
         const branch = await Branch.findOne(
-            { 
+            {
                 _id: branchId,
-                'branchProducts.product': productId 
+                'branchProducts.product': productId
             },
-            { 
-                'branchProducts.$': 1 
+            {
+                'branchProducts.$': 1
             }
         );
 
@@ -308,7 +327,7 @@ async function isStockAvailable(newCartInfo) {
             }
         }
         throw error;
-    }   
+    }
 }
 
 
@@ -327,16 +346,16 @@ const validateCartProductsWithNewAddress = async (userId, newBranchId) => {
                     quantity: product.quantity,
                     branchId: newBranchId,
                 });
-                if (!stock.hasStock) {                    
-                    let unitPrice = product.price/product.quantity
+                if (!stock.hasStock) {
+                    let unitPrice = product.price / product.quantity
                     product.quantity = stock.maxStock
-                    product.price = stock.maxStock*unitPrice
+                    product.price = stock.maxStock * unitPrice
                 }
                 updatedProducts.push(product);
 
             } catch (error) {
-                
-            }            
+
+            }
         }
         let totalAmount = 0
         updatedProducts.forEach(element => {
@@ -357,7 +376,7 @@ const validateCartProductsWithNewAddress = async (userId, newBranchId) => {
 };
 
 
-module.exports = { 
+module.exports = {
     getCart,
     deleteCart,
     updateCartQuantities,

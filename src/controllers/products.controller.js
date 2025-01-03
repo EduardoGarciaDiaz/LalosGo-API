@@ -3,6 +3,7 @@ const ProductService = require('../services/products.service');
 require('dotenv').config();
 const multer = require('multer');
 const cloudinary = require('../cloudinary');
+const { validationResult } = require('express-validator');
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -14,6 +15,14 @@ const upload = multer({
 
 const createProduct = async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()                
+            });
+        }
+
         let { barCode, name, description, unitPrice, expireDate, image, weight, limit, productStatus, unitMeasure, category } = req.body;
         let { branches } = req.body;
         let newProduct = {
@@ -52,6 +61,14 @@ const createProduct = async (req, res, next) => {
 
 const createProductImage = async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
+
         let productId = req.params.productId;
         upload(req, res, async (err) => {
             if (err) {
@@ -78,7 +95,7 @@ const createProductImage = async (req, res, next) => {
 
 
                 const imageUrl = result.secure_url;
-                const imageId = result.asset_id;
+                const imageId = result.public_id;
 
                 let product = await ProductService.saveProductImage(productId, imageUrl, imageId);
                 if (!product) {
@@ -104,6 +121,14 @@ const createProductImage = async (req, res, next) => {
 
 const editProductImage = async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
+
         const productId = req.params.productId;
         upload(req, res, async (err) => {
             if (err) {
@@ -163,6 +188,14 @@ const editProductImage = async (req, res, next) => {
 
 const getBranchProducts = async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
+
         let { branchId, categoryId } = req.params
         let productsOfBranch
         if (categoryId) {
@@ -203,7 +236,13 @@ const getProducts = async (req, res, next) => {
 
 const patchProduct = async (req, res, next) => {
     try {
-
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
         let productId = req.params.productId;
         let { newStatus } = req.body;
 
@@ -224,6 +263,14 @@ const patchProduct = async (req, res, next) => {
 
 const editProduct = async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
+
         let productId = req.params.productId
         let { barCode, name, description, unitPrice, expireDate, image, weight, limit, productStatus, unitMeasure, category } = req.body;
         let { branches } = req.body;

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const cartController = require('../../controllers/carts.controller.js');
+const authorize = require('../../middlewares/auth.middleware');
 const {
     validateCreateCart,
     validateGetCart,
@@ -9,10 +10,10 @@ const {
     validateGetMainCartDetails
 } = require('../../validators/cart.schema.validator.js');
 
-router.post('/', validateCreateCart, cartController.creteCart)
-router.get('/:userId', validateGetCart, cartController.getCart);
-router.get('/:userId/total', validateGetMainCartDetails, cartController.getMainCartDetails);
-router.delete('/:orderId', validateDeleteCart, cartController.deleteCart);
-router.patch('/:orderId', validateUpdateCartQuantities, cartController.updateCartQuantities);
+router.post('/', authorize('Customer'), validateCreateCart, cartController.creteCart)
+router.get('/:userId', authorize('Customer'), validateGetCart, cartController.getCart);
+router.get('/:userId/total', authorize('Customer'), validateGetMainCartDetails, cartController.getMainCartDetails);
+router.delete('/:orderId', authorize('Customer'), validateDeleteCart, cartController.deleteCart);
+router.patch('/:orderId', authorize('Customer'), validateUpdateCartQuantities, cartController.updateCartQuantities);
 
 module.exports = router
