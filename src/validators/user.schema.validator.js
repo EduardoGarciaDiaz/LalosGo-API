@@ -69,11 +69,11 @@ const createClientAccountSchema = {
             errorMessage: 'Password must be a string'
         },
         isLength: {
-            options: { min: 8 },
-            errorMessage: 'Password must be at least 8 characters long'
+            options: { min: 8, max: 13 },
+            errorMessage: 'password name must be between 8 and 12 characters'
         },
         matches: {
-            options: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/,
+            options: /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&_])[A-Za-z\d@$!%*?&_]{8,13}$/,
             errorMessage: 'Password must contain at least one letter and one number'
         }
     }

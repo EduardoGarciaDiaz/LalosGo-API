@@ -146,7 +146,6 @@ const updatePaymentMethod = async (req, res, next) => {
 const createClientAccount = async (req, res, next) => {
     try {
         const { username, fullname, birthdate, phone, email, password, client } = req.body;
-
         const existinguser = await UserService.findUserByEmailOrPhoneNumber(email, phone, username);
 
         if (existinguser) {
@@ -170,7 +169,6 @@ const createClientAccount = async (req, res, next) => {
         const result = await UserService.createClientAccount(newClientAccount);
 
         return res.status(201).send({
-
             message: "Cuenta de cliente creada correctamente",
             newClientAccount: result
         });
@@ -221,16 +219,6 @@ const recoverPassword = async (req, res, next) => {
         const { newPassword, confirmPassword } = req.body;
         const userId = req.params.userId;
 
-        if (!userId || userId === null || userId === '') {
-            return res.status(400).send({ error: `El id del usuario '${userId}' viene nulo o vacío` })
-        }
-
-        if (!newPassword?.trim() || !confirmPassword?.trim()) {
-            return res.status(400).send({
-                message: "Los campos 'newPassword' y 'confirmPassword' no pueden estar vacíos"
-            });
-        }
-
         if (newPassword !== confirmPassword) {
             return res.status(400).send({
                 message: "Las contraseñas no coinciden"
@@ -255,95 +243,6 @@ const recoverPassword = async (req, res, next) => {
         next(error)
     }
 
-}
-
-
-
-
-const postAddress = async (req, res, next) => {
-    try {
-        const userId = req.params.userId;
-        
-        if (!userId || userId === null || userId === '') {
-            return res.status(400).send({error: `El id del usuario '${userId}' viene nulo o vacío`})
-        }
-
-        const { street, number, cologne, zipcode, locality, 
-            federalEntity, internalNumber, type, latitude, 
-            longitude, isCurrentAddress } = req.body;
-
-        const newAddress = {
-            street,
-            number,
-            cologne,
-            zipcode,
-            locality,
-            federalEntity,
-            internalNumber,
-            type,
-            latitude,
-            longitude,
-            isCurrentAddress
-        }
-
-        const result = await UserService.postAddress(userId, newAddress);
-
-        return res.status(201).send({
-            message: "Dirección registrada correctamente",
-            newAddress: result
-        });
-
-    } catch (error) {
-        if (error.status) {
-            return res
-                .status(error.status)
-                .send({message: error.message});
-        }
-        next(error)
-    }
-}
-
-const putAddress = async (req, res, next) => {
-    try {
-
-        const userId = req.params.userId;
-        const addressId = req.params.addressId;
-
-        if (!userId || userId === null || userId === '') {
-            return res.status(400).send({error: `El id del usuario '${userId}' viene nulo o vacío`})
-        }
-
-        const { street, number, cologne, zipcode, locality, 
-            federalEntity, internalNumber, latitude, 
-            longitude} = req.body;
-
-        const newAddress = {
-            street,
-            number,
-            cologne,
-            zipcode,
-            locality,
-            federalEntity,
-            internalNumber,
-            latitude,
-            longitude,
-        }
-
-        const result = await UserService.putAddress(userId, addressId, newAddress);
-
-        return res.status(201).send({
-            message: "Dirección actualizada correctamente",
-            newAddress: result
-        });
-
-    } catch (error) {
-        if (error.status) {
-            return res
-                .status(error.status)
-                .send({message: error.message});
-        }
-        next(error)
-    }
 }
 
 const sendEmail = async (req, res, next) => {
@@ -384,8 +283,6 @@ const sendEmail = async (req, res, next) => {
     }
 }
 
-
-
 module.exports = {
     postPaymentMethod,
     getPaymentMethods,
@@ -394,7 +291,5 @@ module.exports = {
     createClientAccount,
     updateClientAccount,
     recoverPassword,
-    postAddress, 
-    putAddress, 
     sendEmail
 }
