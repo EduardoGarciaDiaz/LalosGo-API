@@ -1,12 +1,35 @@
 const request = require('supertest')
 const app = require('../../src/index')
 const mongoose = require('mongoose')
+const bcrypt = require('bcrypt');
 const Order = require('../../src/models/Order')
 const Branch = require('../../src/models/Branch')
 const User = require('../../src/models/User')
 const Product = require('../../src/models/Product')
 
 describe('Cart API Success Cases', () => {
+    let authToken = ''
+    const TEST_PASSWORD = 'UserPass00_1'
+
+    let authTokenAdmin = ''
+    let adminUser = null
+    const TEST_PASSWORD_ADMIN = 'AdminTest_001'
+    const SALT_ROUNDS = 10;
+
+    const createAdminUserData = async () => ({
+        username: 'adminUnitTests',
+        fullname: 'User Admin Unit Tests',
+        birthdate: new Date('1990-01-01'),
+        phone: '2288445511',
+        email: 'admintest01@gmail.com',
+        password: await bcrypt.hash(TEST_PASSWORD_ADMIN, SALT_ROUNDS),
+        status: 'Active',
+        employee: {
+            role: 'Administrator',
+            hiredDate: new Date()
+        }
+    })
+
     let branchTest = {
         _id: '',
         name: 'Sucursal Principal',
@@ -48,7 +71,7 @@ describe('Cart API Success Cases', () => {
         birthdate: new Date(),
         phone: 1234567890,
         email: 'email',
-        password: 'password',
+        password: TEST_PASSWORD,
         status: 'Active',
         client: {
             addresses: [{
@@ -75,6 +98,8 @@ describe('Cart API Success Cases', () => {
         await User.deleteMany({})
         await Product.deleteMany({})
         await Order.deleteMany({})
+        const userData = await createAdminUserData()
+        adminUser = await User.create(userData)
     })
 
     afterAll(async () => {
@@ -86,17 +111,35 @@ describe('Cart API Success Cases', () => {
         app.close()
     })
 
+    it('Authentication Admin', async () => {
+        const loginRes = await request(app)
+            .post('/api/v1/auth')
+            .send({
+                username: adminUser.username,
+                password: TEST_PASSWORD_ADMIN
+            });
 
-    it('Crear una sucursal', async () => {
+        expect(loginRes.statusCode).toEqual(200);
+        expect(loginRes.body.token).toBeDefined();
+        expect(loginRes.body).toHaveProperty('token')
+        expect(typeof loginRes.body.token).toBe('string')
+        expect(loginRes.body.token).not.toBe('')
+
+        authTokenAdmin = loginRes.body.token;
+    })
+
+
+    it('Create branch', async () => {
         const res = await request(app)
             .post('/api/v1/branches')
             .send(branchTest)
+            .set('Authorization', `Bearer ${authTokenAdmin}`)
 
         expect(res.statusCode).toEqual(201);
         branchTest._id = res.body.branch._id
     })
 
-    it('Create producto', async () => {
+    it('Create product', async () => {
         let branches = [{
             id: branchTest._id,
             quantity: 10
@@ -107,6 +150,7 @@ describe('Cart API Success Cases', () => {
                 ...productTest,
                 branches
             })
+            .set('Authorization', `Bearer ${authTokenAdmin}`)
 
         expect(res.statusCode).toEqual(201)
         productTest._id = res.body.product._id
@@ -117,8 +161,26 @@ describe('Cart API Success Cases', () => {
         const res = await request(app)
             .post('/api/v1/users')
             .send(userTest)
+
         expect(res.statusCode).toEqual(201)
         userTest._id = res.body.newClientAccount._id
+    })
+
+    it('Authentication', async () => {
+        const loginRes = await request(app)
+            .post('/api/v1/auth')
+            .send({
+                username: userTest.username,
+                password: TEST_PASSWORD
+            });
+
+        expect(loginRes.statusCode).toEqual(200);
+        expect(loginRes.body.token).toBeDefined();
+        expect(loginRes.body).toHaveProperty('token')
+        expect(typeof loginRes.body.token).toBe('string')
+        expect(loginRes.body.token).not.toBe('')
+
+        authToken = loginRes.body.token;
     })
 
     it('Create cart', async () => {
@@ -134,6 +196,7 @@ describe('Cart API Success Cases', () => {
                 productForCart: productForCartTest,
                 branchId: branchTest._id,
             })
+            .set('Authorization', `Bearer ${authToken}`)
 
         expect(res.statusCode).toEqual(200)
         expect(res.body.cart).toBeDefined()
@@ -146,6 +209,7 @@ describe('Cart API Success Cases', () => {
             .query({
                 status: 'reserved'
             })
+            .set('Authorization', `Bearer ${authToken}`)
 
         expect(res.statusCode).toEqual(200)
         expect(res.body.cart).toBeDefined()
@@ -157,6 +221,7 @@ describe('Cart API Success Cases', () => {
             .query({
                 status: 'reserved'
             })
+            .set('Authorization', `Bearer ${authToken}`)
 
         expect(res.statusCode).toEqual(200)
         expect(res.body.cartSummary).toBeDefined()
@@ -169,6 +234,7 @@ describe('Cart API Success Cases', () => {
             .query({
                 status: 'reserved'
             })
+            .set('Authorization', `Bearer ${authToken}`)
 
         expect(res.statusCode).toEqual(200)
     })
@@ -184,6 +250,7 @@ describe('Cart API Success Cases', () => {
                 quantity: 2,
                 branchId: branchTest._id
             })
+            .set('Authorization', `Bearer ${authToken}`)
 
         expect(res.statusCode).toEqual(200)
         expect(res.body.cart).toBeDefined()
