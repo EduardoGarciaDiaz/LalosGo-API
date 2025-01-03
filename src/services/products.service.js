@@ -276,7 +276,7 @@ const consultBranchProductsByCategory = async (branchId, categoryId) => {
                 message: "No se encontraron productos"
             };
         }
-        const filteredProducts = foundBranch.branchProducts.filter(bp => bp.product);
+        const filteredProducts = foundBranch.branchProducts.filter(bp => bp.product && bp.product !== null);
 
         return filteredProducts;
 
