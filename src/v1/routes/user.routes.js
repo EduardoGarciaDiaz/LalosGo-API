@@ -12,8 +12,16 @@ const {
 const {
     validateCreateClientAccount,
     validateUpdateClientAccount, 
-    validateRecoverPassword, 
+    validateRecoverPassword
 } = require('../../validators/user.schema.validator.js');
+
+const {
+    validateCreateAddress, 
+    validateModifyAddress, 
+    validateDeleteAddress, 
+    validateGetAddresses
+} = require('../../validators/address.schema.validator.js');
+
 
 router.get('/:userId/payment-methods', authorize('Customer'), validateGetPaymentMethods, userController.getPaymentMethods);
 router.post('/:userId/payment-methods', authorize('Customer'), validateCreatePaymentMethod, userController.postPaymentMethod);
@@ -24,11 +32,11 @@ router.delete('/:userId/payment-methods/:paymentMethodId', authorize('Customer')
 router.post('/', validateCreateClientAccount, userController.createClientAccount);
 router.put('/:id', authorize('Customer'), validateUpdateClientAccount, userController.updateClientAccount);
 router.patch('/:userId/password',validateRecoverPassword, userController.recoverPassword);
-router.get('/:userId/addresses', authorize('Customer'), AddressController.getAddresses);
+router.get('/:userId/addresses', authorize('Customer'), validateGetAddresses, AddressController.getAddresses);
 router.put('/:userId/addresses', authorize('Customer'), AddressController.updateCurrentAddresStatus)
-router.post('/:userId/addresses', authorize('Customer'), AddressController.postAddress);
-router.put('/:userId/addresses/:addressId', authorize('Customer'), AddressController.putAddress);
+router.post('/:userId/addresses', authorize('Customer'), validateCreateAddress,  AddressController.postAddress);
+router.put('/:userId/addresses/:addressId', authorize('Customer'), validateModifyAddress, AddressController.putAddress);
 router.post('/password', userController.sendEmail)
-router.delete('/:userId/addresses/:addressId', authorize('Customer'), AddressController.deleteAddress);
+router.delete('/:userId/addresses/:addressId', authorize('Customer'), validateDeleteAddress, AddressController.deleteAddress);
 
 module.exports = router
