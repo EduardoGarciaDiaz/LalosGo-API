@@ -145,6 +145,14 @@ const updatePaymentMethod = async (req, res, next) => {
 
 const createClientAccount = async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
+
         const { username, fullname, birthdate, phone, email, password, client } = req.body;
         const existinguser = await UserService.findUserByEmailOrPhoneNumber(email, phone, username);
 
@@ -184,6 +192,14 @@ const createClientAccount = async (req, res, next) => {
 
 const updateClientAccount = async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
+
         const userId = req.params.id;
         if (!userId || userId === null || userId === '') {
             return res.status(400).send({ error: `El id del usuario '${userId}' está vacío o nulo` });
@@ -216,6 +232,15 @@ const updateClientAccount = async (req, res, next) => {
 
 const recoverPassword = async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
+
+
         const { newPassword, confirmPassword } = req.body;
         const userId = req.params.userId;
 

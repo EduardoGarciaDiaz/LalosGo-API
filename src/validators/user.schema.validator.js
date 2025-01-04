@@ -2,7 +2,9 @@ const { checkSchema } = require('express-validator');
 
 const createClientAccountSchema = {
     username: {
-        optional: false,
+        exists: {
+            errorMessage: 'username is required'
+        },
         isString: {
             errorMessage: 'Username must be a string'
         },
@@ -90,7 +92,9 @@ const updateClientAccountSchema = {
         }
     },
     username: {
-        optional: true,
+        exists: {
+            errorMessage: 'username is required'
+        },
         isString: {
             errorMessage: 'Username must be a string'
         },
@@ -101,7 +105,9 @@ const updateClientAccountSchema = {
         }
     },
     fullname: {
-        optional: true,
+        exists: {
+            errorMessage: 'Full name is required'
+        },
         isString: {
             errorMessage: 'Full name must be a string'
         },
@@ -112,7 +118,9 @@ const updateClientAccountSchema = {
         }
     },
     birthdate: {
-        optional: true,
+        exists: {
+            errorMessage: 'birthdate is required'
+        },
         isISO8601: {
             errorMessage: 'Invalid birthdate format. Use ISO8601 format (YYYY-MM-DD)'
         },
@@ -128,7 +136,9 @@ const updateClientAccountSchema = {
         }
     },
     phone: {
-        optional: true,
+        exists: {
+            errorMessage: 'Phone is required'
+        },
         isInt: {
             errorMessage: 'Phone must be a number'
         },
@@ -156,12 +166,8 @@ const recoverPasswordSchema = {
         isString: {
             errorMessage: 'New password must be a string'
         },
-        isLength: {
-            options: { min: 8 },
-            errorMessage: 'New password must be at least 8 characters long'
-        },
         matches: {
-            options: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/,
+            options: /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&_])[A-Za-z\d@$!%*?&_]{8,13}$/,
             errorMessage: 'New password must contain at least one letter and one number'
         }
     },

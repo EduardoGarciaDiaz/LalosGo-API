@@ -68,6 +68,14 @@ const updateCurrentAddresStatus = async (req, res, next) => {
 
 const postAddress = async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
+
         const userId = req.params.userId;
         
         const { street, number, cologne, zipcode, locality, 
@@ -107,6 +115,14 @@ const postAddress = async (req, res, next) => {
 
 const putAddress = async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
+
 
         const userId = req.params.userId;
         const addressId = req.params.addressId;
@@ -146,6 +162,14 @@ const putAddress = async (req, res, next) => {
 
 const deleteAddress = async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
+
         const userId = req.params.userId;
         const addressId = req.params.addressId;
 
