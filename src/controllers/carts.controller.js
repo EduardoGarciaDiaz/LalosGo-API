@@ -72,7 +72,14 @@ const deleteCart = async (req, res, next) => {
         const orderId = req.params.orderId;
         const status = req.query.status;
 
-        await CartService.deleteCart(orderId, status);
+        let result = await CartService.deleteCart(orderId, status);
+
+        if (!result) {
+            throw {
+                status: 404,
+                message: "Carrito no encontrado"
+            };
+        }
 
         return res.status(200).send({
             message: "Carrito eliminado"
