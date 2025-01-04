@@ -18,7 +18,8 @@ const {
 const {
     validateCreateAddress, 
     validateModifyAddress, 
-    validateDeleteAddress
+    validateDeleteAddress, 
+    validateGetAddresses
 } = require('../../validators/address.schema.validator.js');
 
 
@@ -31,7 +32,7 @@ router.delete('/:userId/payment-methods/:paymentMethodId', authorize('Customer')
 router.post('/', validateCreateClientAccount, userController.createClientAccount);
 router.put('/:id', authorize('Customer'), validateUpdateClientAccount, userController.updateClientAccount);
 router.patch('/:userId/password',validateRecoverPassword, userController.recoverPassword);
-router.get('/:userId/addresses', authorize('Customer'), AddressController.getAddresses);
+router.get('/:userId/addresses', authorize('Customer'), validateGetAddresses, AddressController.getAddresses);
 router.put('/:userId/addresses', authorize('Customer'), AddressController.updateCurrentAddresStatus)
 router.post('/:userId/addresses', authorize('Customer'), validateCreateAddress,  AddressController.postAddress);
 router.put('/:userId/addresses/:addressId', authorize('Customer'), validateModifyAddress, AddressController.putAddress);

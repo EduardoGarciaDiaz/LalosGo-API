@@ -1,4 +1,5 @@
 const { checkSchema } = require('express-validator');
+const { validateGetAddresses } = require('./user.schema.validator');
 
 const createAddressSchema = {
     userId: {
@@ -230,15 +231,6 @@ const modifyAddressSchema = {
             errorMessage: 'Internal number must be a integer'
         }, 
     },
-    type:{
-        exists: {
-            errorMessage: 'Type is required'
-        },
-        equals: {
-            options: ['Point'],
-            errorMessage: 'Type must be Point'
-        }
-    },
     latitude: {
         exists: {
             errorMessage: 'Latitude is required'
@@ -257,7 +249,7 @@ const modifyAddressSchema = {
     }
 }
 
-const deleteAddress = {
+const deleteAddressSchema = {
     userId: {
         in: ['params'],
         exists: {
@@ -278,9 +270,22 @@ const deleteAddress = {
     }
 }
 
+const getAddressesSchema = {
+    userId: {
+        in: ['params'],
+        exists: {
+            errorMessage: 'User ID is required'
+        },
+        isMongoId: {
+            errorMessage: 'Invalid User ID format'
+        }
+    }
+}
+
 
 module.exports = {
     validateCreateAddress: checkSchema(createAddressSchema),
     validateModifyAddress: checkSchema(modifyAddressSchema), 
-    validateDeleteAddress: checkSchema(deleteAddress)
+    validateDeleteAddress: checkSchema(deleteAddressSchema), 
+    validateGetAddresses: checkSchema(getAddressesSchema)
 }
