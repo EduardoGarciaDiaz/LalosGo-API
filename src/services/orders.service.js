@@ -1,5 +1,7 @@
 const Order = require('../models/Order');
 const Branch = require('../models/Branch');
+const User = require('../models/User');
+const Product = require('../models/Product');
 const mongoose = require('mongoose');
 
 const cartToOrder = async (orderDetails) => {
@@ -161,7 +163,10 @@ async function rollbackUpdates(branchId, productUpdates) {
 
 const getAllOrders = async function () {
     try {
-        const orders = await Order.find({});
+        const orders = await Order.find({}).populate({
+            path: 'orderProducts.product',
+            select: 'image'
+        });
         return orders;
     } catch (error) {
         throw error;
@@ -170,7 +175,10 @@ const getAllOrders = async function () {
 
 const getAllOrdersByCustomer = async function (customerId) {
     try {
-        const orders = await Order.find({ customer: customerId });
+        const orders = await Order.find({ customer: customerId }).populate({
+            path: 'orderProducts.product',
+            select: 'image'
+        });
         return orders;
     }
     catch (error) {
@@ -234,8 +242,7 @@ const getOrder = async function (orderId) {
 
 const updateStatus = async function (orderId, status) {
     try {
-        await User.findOneAndUpdate({ _id: orderId }, { status: status });
-        const updatedOrder = await Order.findById(orderId);
+        updatedOrder = await Order.findOneAndUpdate({ _id: orderId }, { $set: { statusOrder: status } });
         return updatedOrder;
     }
     catch (error) {
