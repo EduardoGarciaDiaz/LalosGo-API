@@ -8,5 +8,5 @@ router.get('/:orderId', authorize('Manager,Customer,Delivery Person,Sales Execut
 router.put('/:orderId', authorize('Customer'), orders.cartToOrder);
 //router.post('/:id/deliveryPerson', authorize('Sales Executive'), orders.assignDeliveryPerson);
 //router.delete('/:id/deliveryPerson:deliveryPersonId', authorize('Sales Executive'), orders.unassignDeliveryPerson);
-router.post('/:id/status:status', authorize('Sales Executive,Delivery Person,Customer'), orders.updateStatus);
+router.post('/:id/:status', authorize('Sales Executive,Delivery Person,Customer'), orders.updateStatus);
 module.exports = router

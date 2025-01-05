@@ -80,7 +80,10 @@ self.getAll = async (req, res, next) => {
                 data = await OrderService.getAllOrders();
                 break;
         }
-        return res.status(200).json(data);
+        
+        return res.status(200).send({
+            orders: data
+        })
     } catch (error) {
         next(error);
     }
@@ -119,7 +122,7 @@ self.updateStatus = async (req, res, next) => {
         const role = decodedToken.role;
         const statusForDeliveryPerson = ['in transit', 'delivered', 'not delivered'];
         const statusForSalesExecutive = ['approved', 'denied'];
-        const statusForCustomer = ['canceled'];
+        const statusForCustomer = ['cancelled'];
         const order = await OrderService.getOrder(orderId);
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
@@ -144,14 +147,13 @@ self.updateStatus = async (req, res, next) => {
             return res.status(403).json({ message: "Rol no permitido para cambiar el estado de la orden." });
         }
 
-        OrderService.updateStatus(orderId, status);
-        return res.status(200).json({ message: "Estado de la orden actualizado."}, order);
+        let result = await OrderService.updateStatus(orderId, status);
+        return res.status(200).send({ message: "Estado de la orden actualizado", order: result });
 
     } catch (error) {
         next(error);
     }
 };
-
 
 
 module.exports = self;
