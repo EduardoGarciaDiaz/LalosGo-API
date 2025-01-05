@@ -162,7 +162,7 @@ describe('Branch API Success Cases', () => {
         it('Change branch status', async () => {
             const res = await request(app)
                 .patch(`/api/v1/branches/${branchTest._id}`)
-                .query({ changeStatus: 'Active' })
+                .query({ changeStatus: 'Inactive' })
                 .set('Authorization', `Bearer ${authToken}`)
 
             expect(res.statusCode).toEqual(200)

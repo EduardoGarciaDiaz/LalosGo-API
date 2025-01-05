@@ -109,7 +109,7 @@ describe('User API Failure Cases', () => {
 
         it('Add payment method without all fields', async () => {
             const res = await request(app)
-                .post(`/api/v1/users/${null}/payment-methods`)
+                .post(`/api/v1/users/${userClientTest._id}/payment-methods`)
                 .send({
                     cardNumber: '4415712345678910',
                     cardEmitter: 'BBVA'
@@ -121,7 +121,7 @@ describe('User API Failure Cases', () => {
 
         it('Add payment method with invalid card number', async () => {
             const res = await request(app)
-            .post(`/api/v1/users/${null}/payment-methods`)
+            .post(`/api/v1/users/${userClientTest._id}/payment-methods`)
             .send({
                 cardOwner: 'card Owner Test',
                 cardNumber: 'one,two,three,four',
@@ -137,7 +137,7 @@ describe('User API Failure Cases', () => {
 
         it('Add payment method with invalid card owner', async () => {
             const res = await request(app)
-            .post(`/api/v1/users/${null}/payment-methods`)
+            .post(`/api/v1/users/${userClientTest._id}/payment-methods`)
             .send({
                 cardOwner: '',
                 cardNumber: '4415712345678910',
@@ -225,7 +225,7 @@ describe('User API Failure Cases', () => {
     
         it('Delete payment method with invalid ID', async () => {
             const res = await request(app)
-                .delete(`/api/v1/users/${null}/payment-methods/${12222}`)
+                .delete(`/api/v1/users/${userClientTest._id}/payment-methods/${12222}`)
                 .set('Authorization', `Bearer ${authToken}`)
 
             expect(res.statusCode).toEqual(400)

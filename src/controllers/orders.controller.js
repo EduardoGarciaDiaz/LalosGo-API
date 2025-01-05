@@ -68,7 +68,7 @@ self.getAll = async (req, res, next) => {
         const decodedToken = jwt.verify(token, jwtSecret);
         const role = decodedToken.role;
 
-        const data = {};
+        let data = {};
         switch (role) {
             case 'Customer':
                 data = await OrderService.getAllOrdersByCustomer(decodedToken.id);

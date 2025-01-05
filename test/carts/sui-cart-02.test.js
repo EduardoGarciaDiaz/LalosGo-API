@@ -242,7 +242,7 @@ describe('Cart API Failure Cases', () => {
 
     it('Get cart with invalid cart status', async () => {
         const res = await request(app)
-            .get(`/api/v1/carts/${'1'}`)
+            .get(`/api/v1/carts/${userTest._id}`)
             .query({
                 status: 'carrito'
             })
@@ -264,9 +264,8 @@ describe('Cart API Failure Cases', () => {
     })
 
     it('Get cart details with status other than cart', async () => {
-        let userId = null;
         const res = await request(app)
-            .get(`/api/v1/carts/${userId}/total`)
+            .get(`/api/v1/carts/${userTest._id}/total`)
             .query({
                 status: 'cancelado'
             })
@@ -275,11 +274,9 @@ describe('Cart API Failure Cases', () => {
         expect(res.statusCode).toEqual(400)
     })
 
-
-
     it('Delete cart with invalid id', async () => {
         const res = await request(app)
-            .delete(`/api/v1/carts/idDelUsuario01`)
+            .delete(`/api/v1/carts/idDelCArrito01`)
             .query({
                 status: 'reserved'
             })
@@ -288,9 +285,20 @@ describe('Cart API Failure Cases', () => {
         expect(res.statusCode).toEqual(400)
     })
 
+    it('Delete cart with inexistent id', async () => {
+        const res = await request(app)
+            .delete(`/api/v1/carts/6ffff57ddd4c1ffddfbfdcfd`)
+            .query({
+                status: 'reserved'
+            })
+            .set('Authorization', `Bearer ${authToken}`)
+
+        expect(res.statusCode).toEqual(404)
+    })
+
     it('Delete cart with a status other than cart', async () => {
         const res = await request(app)
-            .delete(`/api/v1/carts/idDelUsuario01`)
+            .delete(`/api/v1/carts/${orderId}`)
             .query({
                 status: 'vendido'
             })
