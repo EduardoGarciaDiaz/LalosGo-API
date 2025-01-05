@@ -66,4 +66,17 @@ self.updateStatus = async function (req, res, next) {
     }
 }
 
+self.getEmployeeByRole = async function (req, res, next) {
+    try {
+        const { branchId } = req.params.branchId;
+        const { role } = req.body
+
+        const data = await EmployeesService.getEmployeeByRole( branchId, role);
+
+        return res.status(200).json(data);
+    } catch (error) {
+        next(error);
+    }
+}
+
 module.exports = self;

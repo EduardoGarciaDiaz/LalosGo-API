@@ -152,6 +152,27 @@ self.updateStatus = async (req, res, next) => {
     }
 };
 
+self.assignDeliveryPerson = async (req, res, next) => {
+    try {
+        const orderId = req.params.orderId;
+        const deliveryPersonId = req.params.deliveryPersonId;
+
+        const result = await OrderService.assignDeliveryPerson(orderId, deliveryPersonId);
+
+        return res.status(200).send({
+            message: "Se ha asignado un repartidor a la orden",
+            order: result
+        });
+    } catch (error) {
+        if (error.status) {
+            return res
+                .status(error.status)
+                .send({ message: error.message });
+        }
+        next(error)
+    }
+}
+
 
 
 module.exports = self;

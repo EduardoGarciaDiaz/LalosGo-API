@@ -134,4 +134,39 @@ EmployeesService.updateEmployeeStatus = async function (employee) {
     }
 }
 
+EmployeesService.getEmployeeByRole = async function (branchId, role) {
+    try {
+        const branchFound = await Branch.findById(branchId);
+
+        if (!branchFound) {
+            throw {
+                status: 404,
+                message: "sucursal no encontrado"
+            };
+        }
+
+        const foundEmployees = await User.find({
+            'employee.branch': branchId, 
+            'employee.role': role 
+        }).select('-password');
+
+        if (foundEmployees.length === 0) {
+            throw {
+                status: 404,
+                message: "No se encontraron empleados con el rol solicitado en esta sucursal"
+            };
+        }
+
+        return foundEmployees;
+    } catch (error) {
+        if (error.status) {
+            throw {
+                status: error.status,
+                message: error.message
+            }
+        }
+        throw error;
+    }
+};
+
 module.exports = EmployeesService;
