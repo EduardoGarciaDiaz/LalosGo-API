@@ -250,6 +250,38 @@ const updateStatus = async function (orderId, status) {
     }
 }
 
+const assignDeliveryPerson = async function (orderId, deliveryPerson) {
+    try {
+        const order = await Order.findById(orderId);
+
+        if (!order) {
+            const error = new Error('Orden no encontrada');
+            error.status = 404;
+            throw error;
+        }
+
+        const deliveryPersonfound = await User.findById(deliveryPerson);
+
+        if (!deliveryPersonfound) {
+            const error = new Error('Repartidor no encontrado');
+            error.status = 404;
+            throw error;
+        }
+
+        const updatedOrder = await Order.findByIdAndUpdate(
+            orderId,
+            { deliveryPerson: deliveryPerson },
+            { new: true } 
+        );
+
+        return updatedOrder;
+    }
+    catch (error) {
+        throw error;
+    }
+}
+
+
 module.exports = {
     cartToOrder,
     getAllOrders,
@@ -258,5 +290,6 @@ module.exports = {
     getOrderByCustomer,
     getOrderByDeliveryPerson,
     getOrder,
-    updateStatus
+    updateStatus, 
+    assignDeliveryPerson
 }
