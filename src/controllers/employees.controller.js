@@ -1,4 +1,5 @@
 //const {body, validationResult} = require('express-validator');
+const e = require('express');
 const EmployeesService = require('../services/employees.service');
 const bcrypt = require('bcrypt');
 
@@ -30,11 +31,6 @@ self.get = async function (req, res, next) {
 
 self.create = async function (req, res, next) {
     try {
-        /*const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            res.status(400).json(errors)
-            return;
-        }*/
         const employee = req.body;
         const data = await EmployeesService.saveEmployee(employee);
         return res.status(201).json(data);
@@ -68,12 +64,10 @@ self.updateStatus = async function (req, res, next) {
 
 self.getEmployeeByRole = async function (req, res, next) {
     try {
-        const { branchId } = req.params.branchId;
-        const { role } = req.body
-
-        const data = await EmployeesService.getEmployeeByRole( branchId, role);
-
-        return res.status(200).json(data);
+        const { role, branchId } = req.params;
+        let dataEmployees = {};
+        dataEmployees = await EmployeesService.getEmployeeByRole( branchId, role);
+        return res.status(200).send({employees : dataEmployees});
     } catch (error) {
         next(error);
     }

@@ -173,12 +173,8 @@ self.assignDeliveryPerson = async (req, res, next) => {
             message: "Se ha asignado un repartidor a la orden",
             order: result
         });
+
     } catch (error) {
-        if (error.status) {
-            return res
-                .status(error.status)
-                .send({ message: error.message });
-        }
         next(error)
     }
 }
