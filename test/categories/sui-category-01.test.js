@@ -32,7 +32,7 @@ describe('Category API Success Cases', () => {
         identifier: 'LACT001',
         name: 'Lácteos y Carner',
         categoryStatus: true        
-    }
+    } 
 
     beforeAll(async () => {
         await Category.deleteMany({})
