@@ -12,4 +12,6 @@ router.put('/:id', authorize('Administrator'), employees.update);
 
 router.patch('/:id', authorize('Administrator'), employees.updateStatus);
 
+router.get('/:role/branch/:branchId', authorize('Administrator, Manager,Sales Executive'), employees.getEmployeeByRole);
+
 module.exports = router;

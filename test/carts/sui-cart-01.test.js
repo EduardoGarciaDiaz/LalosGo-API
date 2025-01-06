@@ -228,17 +228,6 @@ describe('Cart API Success Cases', () => {
         expect(res.body.cartSummary.totalPrice).toEqual(150)
     })
 
-    it('Delete cart', async () => {
-        const res = await request(app)
-            .delete(`/api/v1/carts/${userTest._id}`)
-            .query({
-                status: 'reserved'
-            })
-            .set('Authorization', `Bearer ${authToken}`)
-
-        expect(res.statusCode).toEqual(200)
-    })
-
     it('Update cart quantities', async () => {
         const res = await request(app)
             .patch(`/api/v1/carts/${orderId}`)
@@ -254,5 +243,16 @@ describe('Cart API Success Cases', () => {
 
         expect(res.statusCode).toEqual(200)
         expect(res.body.cart).toBeDefined()
+    })
+
+    it('Delete cart', async () => {
+        const res = await request(app)
+            .delete(`/api/v1/carts/${orderId}`)
+            .query({
+                status: 'reserved'
+            })
+            .set('Authorization', `Bearer ${authToken}`)
+
+        expect(res.statusCode).toEqual(200)
     })
 })

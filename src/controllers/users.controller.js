@@ -2,8 +2,8 @@ const UserService = require('../services/users.service');
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const { validationResult } = require('express-validator');
-const { Resend } = require('resend');
 require('dotenv').config();
+const nodemailer = require("nodemailer");
 
 const postPaymentMethod = async (req, res, next) => {
     try {
@@ -145,6 +145,14 @@ const updatePaymentMethod = async (req, res, next) => {
 
 const createClientAccount = async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
+
         const { username, fullname, birthdate, phone, email, password, client } = req.body;
         const existinguser = await UserService.findUserByEmailOrPhoneNumber(email, phone, username);
 
@@ -184,6 +192,14 @@ const createClientAccount = async (req, res, next) => {
 
 const updateClientAccount = async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
+
         const userId = req.params.id;
         if (!userId || userId === null || userId === '') {
             return res.status(400).send({ error: `El id del usuario '${userId}' está vacío o nulo` });
@@ -216,6 +232,14 @@ const updateClientAccount = async (req, res, next) => {
 
 const recoverPassword = async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "Los datos proporcionados no son válidos",
+                errors: errors.array()
+            });
+        }
+
         const { newPassword, confirmPassword } = req.body;
         const userId = req.params.userId;
 
@@ -245,31 +269,37 @@ const recoverPassword = async (req, res, next) => {
 
 }
 
+const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL,
+      pass: process.env.EMAIL_PASS,
+    },
+});
+
 const sendEmail = async (req, res, next) => {
-    try {
-        const {confirmationCode, email} = req.body;
+    try{
+        const { confirmationCode, email } = req.body;
 
         const user = await UserService.findUserByEmail(email);
 
         if (!user) {
             return res.status(404).send({message: "El email no existe"});
-        } else {
-            console.log(user);
         }
 
-        const resend = new Resend(process.env.RESEND_API_KEY);
-        (async function () {
-            await resend.emails.send({
-              from: 'Acme <onboarding@resend.dev>',
-              to: [email],
-              subject: 'Prueba envío código',
-              html: `<p>El código de confirmación es: ${confirmationCode}</p>`,
-            });
-          })();
+        const mailOptions = {
+            from: "devandtrash@gmail.com",
+            to: email,
+            subject: "Código de verificación",
+            text: `Este es su código de verificación: ${confirmationCode}`,
+        };
+    
+        await transporter.sendMail(mailOptions)
 
         const id = user._id;
+
         return res.status(200).send({
-            message: "Se ha enviado el correo correctamente",
+            message: "Se ha enviado el código de verificación al correo",
             userId: id
         });
 
@@ -277,7 +307,7 @@ const sendEmail = async (req, res, next) => {
         if (error.status) {
             return res
                 .status(error.status)
-                .send({message: error.message});
+                .send({ message: error.message });
         }
         next(error)
     }

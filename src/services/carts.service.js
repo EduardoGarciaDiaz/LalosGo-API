@@ -134,9 +134,8 @@ const getCart = async (userId, status) => {
 const deleteCart = async (orderId, status) => {
     try {
         if (status !== undefined && status === CART_STATUS) {
-            await Order.deleteOne({ _id: orderId, statusOrder: status });
-
-            return;
+            let result = await Order.deleteOne({ _id: orderId, statusOrder: status });
+            return result.deletedCount > 0;
         }
     } catch (error) {
         if (error.status) {

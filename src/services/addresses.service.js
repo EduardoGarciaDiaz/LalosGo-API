@@ -7,7 +7,12 @@ const { addAbortListener } = require('supertest/lib/test');
 
 const getAddresses = async (userId) => {
     try {
-        //TODO: Validar que el Id sea válido
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            throw {
+                status: 400,
+                message: "El id del usuario es inválido"
+            };
+        }
 
         const userFound = await User.findById(userId);
 
@@ -96,7 +101,8 @@ const postAddress = async (userId, newAddress) => {
         userFound.client.addresses.push(newAddress);
 
         await userFound.save();
-        return newAddress;
+        const addedAdress = userFound.client.addresses[userFound.client.addresses.length - 1];
+        return addedAdress;
 
     } catch (error) {
         if (error.status) {
@@ -111,23 +117,6 @@ const postAddress = async (userId, newAddress) => {
 
 const putAddress = async (userId, addressId, updatedPaymentMethod) => {
     try {
-
-        if (!mongoose.Types.ObjectId.isValid(userId)) {
-            console.log('El id del usuario es inválido');
-            throw {
-                status: 400,
-                message: "El id del usuario es inválido"
-            };
-        }
-
-        if (!mongoose.Types.ObjectId.isValid(addressId)) {
-            console.log('El id de la dirección es inválido');
-            throw {
-                status: 400,
-                message: "El id de la dirección es inválido"
-            };
-        }
-
         const userFound = await User.findById(userId);
 
         if (!userFound) {
@@ -138,7 +127,6 @@ const putAddress = async (userId, addressId, updatedPaymentMethod) => {
         }
 
         if (!userFound.client.addresses) {
-            console.log('El usuario no tiene direcciones asignadas');
             throw {
                 status: 400,
                 message: "El usuario no tiene direcciones asignadas"
@@ -149,7 +137,7 @@ const putAddress = async (userId, addressId, updatedPaymentMethod) => {
         if (!addressFound) {
             throw {
                 status: 404,
-                message: "Método de pago no encontrado"
+                message: "Dirección no encontrado"
             };
         }
 

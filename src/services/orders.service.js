@@ -1,6 +1,9 @@
 const Order = require('../models/Order');
 const Branch = require('../models/Branch');
+const User = require('../models/User');
+const Product = require('../models/Product');
 const mongoose = require('mongoose');
+const { patch } = require('../v1/routes/cart.routes');
 
 const cartToOrder = async (orderDetails) => {
     try {
@@ -161,7 +164,10 @@ async function rollbackUpdates(branchId, productUpdates) {
 
 const getAllOrders = async function () {
     try {
-        const orders = await Order.find({});
+        const orders = await Order.find({}).populate({
+            path: 'orderProducts.product',
+            select: 'image'
+        });
         return orders;
     } catch (error) {
         throw error;
@@ -170,7 +176,10 @@ const getAllOrders = async function () {
 
 const getAllOrdersByCustomer = async function (customerId) {
     try {
-        const orders = await Order.find({ customer: customerId });
+        const orders = await Order.find({ customer: customerId }).populate({
+            path: 'orderProducts.product',
+            select: 'image'
+        });
         return orders;
     }
     catch (error) {
@@ -190,7 +199,18 @@ const getAllOrdersByDeliveryPerson = async function (deliveryPersonId) {
 
 const getOrderByCustomer = async function (customerId, orderId) {
     try {
-        const order = await Order.findOne({ customer: customerId, _id: orderId });
+        const order = await Order.findOne({ customer: customerId, _id: orderId })
+            .populate([
+                { path: 'orderProducts.product' },
+                {
+                    path: 'branch',
+                    select: 'address'
+                },
+                {
+                    path: 'customer',
+                    select: 'client.addresses'
+                }
+            ]);
 
         if (!order) {
             const error = new Error('Orden no encontrada');
@@ -205,7 +225,18 @@ const getOrderByCustomer = async function (customerId, orderId) {
 
 const getOrderByDeliveryPerson = async function (deliveryPersonId, orderId) {
     try {
-        const order = await Order.findOne({ deliveryPerson: deliveryPersonId, _id: orderId });
+        const order = await Order.findOne({ deliveryPerson: deliveryPersonId, _id: orderId })
+        .populate([
+            { path: 'orderProducts.product' },
+            {
+                path: 'branch',
+                select: 'address'
+            },
+            {
+                path: 'customer',
+                select: 'client.addresses'
+            }
+        ]);
 
         if (!order) {
             const error = new Error('Orden no encontrada');
@@ -219,7 +250,18 @@ const getOrderByDeliveryPerson = async function (deliveryPersonId, orderId) {
 
 const getOrder = async function (orderId) {
     try {
-        const order = await Order.findById(orderId);
+        const order = await Order.findById(orderId)
+        .populate([
+            { path: 'orderProducts.product' },
+            {
+                path: 'branch',
+                select: 'address'
+            },
+            {
+                path: 'customer',
+                select: 'client.addresses'
+            }
+        ]);
 
         if (!order) {
             const error = new Error('Orden no encontrada');
@@ -234,14 +276,45 @@ const getOrder = async function (orderId) {
 
 const updateStatus = async function (orderId, status) {
     try {
-        await User.findOneAndUpdate({ _id: orderId }, { status: status });
-        const updatedOrder = await Order.findById(orderId);
+        updatedOrder = await Order.findOneAndUpdate({ _id: orderId }, { $set: { statusOrder: status } });
         return updatedOrder;
     }
     catch (error) {
         throw error;
     }
 }
+
+const assignDeliveryPerson = async function (orderId, deliveryPerson) {
+    try {
+        const order = await Order.findById(orderId);
+
+        if (!order) {
+            const error = new Error('Orden no encontrada');
+            error.status = 404;
+            throw error;
+        }
+
+        const deliveryPersonfound = await User.findById(deliveryPerson);
+
+        if (!deliveryPersonfound) {
+            const error = new Error('Repartidor no encontrado');
+            error.status = 404;
+            throw error;
+        }
+
+        const updatedOrder = await Order.findByIdAndUpdate(
+            orderId,
+            { deliveryPerson: deliveryPerson },
+            { new: true }
+        );
+
+        return updatedOrder;
+    }
+    catch (error) {
+        throw error;
+    }
+}
+
 
 module.exports = {
     cartToOrder,
@@ -251,5 +324,6 @@ module.exports = {
     getOrderByCustomer,
     getOrderByDeliveryPerson,
     getOrder,
-    updateStatus
+    updateStatus,
+    assignDeliveryPerson
 }

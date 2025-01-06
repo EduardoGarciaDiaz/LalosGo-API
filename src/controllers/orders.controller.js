@@ -62,13 +62,13 @@ self.cartToOrder = async (req, res, next) => {
 
 self.getAll = async (req, res, next) => {
     try {
-        
+
         const authHeader = req.header('Authorization');
         const token = authHeader.split(' ')[1];
         const decodedToken = jwt.verify(token, jwtSecret);
         const role = decodedToken.role;
 
-        const data = {};
+        let data = {};
         switch (role) {
             case 'Customer':
                 data = await OrderService.getAllOrdersByCustomer(decodedToken.id);
@@ -80,7 +80,10 @@ self.getAll = async (req, res, next) => {
                 data = await OrderService.getAllOrders();
                 break;
         }
-        return res.status(200).json(data);
+
+        return res.status(200).send({
+            orders: data
+        })
     } catch (error) {
         next(error);
     }
@@ -93,17 +96,24 @@ self.get = async (req, res, next) => {
         const token = authHeader.split(' ')[1];
         const decodedToken = jwt.verify(token, jwtSecret);
         const role = decodedToken.role;
+        let data = {};
 
-        const data = {};
         switch (role) {
             case 'Customer':
                 data = await OrderService.getOrderByCustomer(decodedToken.id, orderId);
+                break;
             case 'Delivery Person':
                 data = await OrderService.getOrderByDeliveryPerson(decodedToken.id, orderId);
+                break;
             default:
                 data = await OrderService.getOrder(orderId);
+                break;
         }
-        return res.status(200).json(data);
+
+        return res.status(200).send({
+            order: data
+        });
+
     } catch (error) {
         next(error);
     }
@@ -119,7 +129,7 @@ self.updateStatus = async (req, res, next) => {
         const role = decodedToken.role;
         const statusForDeliveryPerson = ['in transit', 'delivered', 'not delivered'];
         const statusForSalesExecutive = ['approved', 'denied'];
-        const statusForCustomer = ['canceled'];
+        const statusForCustomer = ['cancelled'];
         const order = await OrderService.getOrder(orderId);
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
@@ -144,14 +154,30 @@ self.updateStatus = async (req, res, next) => {
             return res.status(403).json({ message: "Rol no permitido para cambiar el estado de la orden." });
         }
 
-        OrderService.updateStatus(orderId, status);
-        return res.status(200).json({ message: "Estado de la orden actualizado."}, order);
+        let result = await OrderService.updateStatus(orderId, status);
+        return res.status(200).send({ message: "Estado de la orden actualizado", order: result });
 
     } catch (error) {
         next(error);
     }
 };
 
+self.assignDeliveryPerson = async (req, res, next) => {
+    try {
+        const orderId = req.params.orderId;
+        const deliveryPersonId = req.params.deliveryPersonId;
+
+        const result = await OrderService.assignDeliveryPerson(orderId, deliveryPersonId);
+
+        return res.status(200).send({
+            message: "Se ha asignado un repartidor a la orden",
+            order: result
+        });
+
+    } catch (error) {
+        next(error)
+    }
+}
 
 
 module.exports = self;
