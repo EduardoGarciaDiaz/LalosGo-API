@@ -299,7 +299,6 @@ const editProduct = async (req, res, next) => {
         }
 
     } catch (error) {
-        console.log(error);
         if (error.status) {
             return res.status(error.status).send({ message: error.message });
         }
