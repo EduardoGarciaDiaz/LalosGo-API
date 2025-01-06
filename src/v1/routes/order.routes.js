@@ -7,6 +7,6 @@ router.get('/', authorize('Manager,Customer,Delivery Person,Sales Executive'), o
 router.get('/:orderId', authorize('Manager,Customer,Delivery Person,Sales Executive'), orders.get);
 router.put('/:orderId', authorize('Customer'), orders.cartToOrder);
 router.put('/:orderId/deliveryPerson/:deliveryPersonId', authorize('Sales Executive'), orders.assignDeliveryPerson);
-//router.delete('/:id/deliveryPerson:deliveryPersonId', authorize('Sales Executive'), orders.unassignDeliveryPerson);
 router.post('/:id/:status', authorize('Sales Executive,Delivery Person,Customer'), orders.updateStatus);
+
 module.exports = router

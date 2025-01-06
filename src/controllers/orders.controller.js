@@ -62,7 +62,7 @@ self.cartToOrder = async (req, res, next) => {
 
 self.getAll = async (req, res, next) => {
     try {
-        
+
         const authHeader = req.header('Authorization');
         const token = authHeader.split(' ')[1];
         const decodedToken = jwt.verify(token, jwtSecret);
@@ -80,7 +80,7 @@ self.getAll = async (req, res, next) => {
                 data = await OrderService.getAllOrders();
                 break;
         }
-        
+
         return res.status(200).send({
             orders: data
         })
@@ -96,17 +96,24 @@ self.get = async (req, res, next) => {
         const token = authHeader.split(' ')[1];
         const decodedToken = jwt.verify(token, jwtSecret);
         const role = decodedToken.role;
+        let data = {};
 
-        const data = {};
         switch (role) {
             case 'Customer':
                 data = await OrderService.getOrderByCustomer(decodedToken.id, orderId);
+                break;
             case 'Delivery Person':
                 data = await OrderService.getOrderByDeliveryPerson(decodedToken.id, orderId);
+                break;
             default:
                 data = await OrderService.getOrder(orderId);
+                break;
         }
-        return res.status(200).json(data);
+
+        return res.status(200).send({
+            order: data
+        });
+
     } catch (error) {
         next(error);
     }
@@ -166,12 +173,8 @@ self.assignDeliveryPerson = async (req, res, next) => {
             message: "Se ha asignado un repartidor a la orden",
             order: result
         });
+
     } catch (error) {
-        if (error.status) {
-            return res
-                .status(error.status)
-                .send({ message: error.message });
-        }
         next(error)
     }
 }
