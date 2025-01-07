@@ -1,6 +1,16 @@
 const { checkSchema } = require('express-validator');
 
 const createProductSchema = {
+    productId: {
+        optional: true,
+        in: ['params'],
+        exists: {
+            errorMessage: 'Product ID is required'
+        },
+        isMongoId: {
+            errorMessage: 'Invalid product ID format'
+        }
+    },
     barCode: {
         exists: {
             errorMessage: 'Bar code is required'

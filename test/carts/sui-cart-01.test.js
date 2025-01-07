@@ -5,7 +5,8 @@ const bcrypt = require('bcrypt');
 const Order = require('../../src/models/Order')
 const Branch = require('../../src/models/Branch')
 const User = require('../../src/models/User')
-const Product = require('../../src/models/Product')
+const Product = require('../../src/models/Product');
+const Category = require('../../src/models/Category');
 
 describe('Cart API Success Cases', () => {
     let authToken = ''
@@ -60,7 +61,7 @@ describe('Cart API Success Cases', () => {
         limit: 10,
         productStatus: true,
         unitMeasure: 'Piece',
-        category: new mongoose.Types.ObjectId(),
+        category: '',
         branch: ''
     }
 
@@ -70,7 +71,7 @@ describe('Cart API Success Cases', () => {
         fullname: 'fullname',
         birthdate: new Date(),
         phone: 1234567890,
-        email: 'email',
+        email: 'email@gmail.com',
         password: TEST_PASSWORD,
         status: 'Active',
         client: {
@@ -98,6 +99,7 @@ describe('Cart API Success Cases', () => {
         await User.deleteMany({})
         await Product.deleteMany({})
         await Order.deleteMany({})
+        await Category.deleteMany({})
         const userData = await createAdminUserData()
         adminUser = await User.create(userData)
     })
@@ -107,6 +109,7 @@ describe('Cart API Success Cases', () => {
         await User.deleteMany({})
         await Product.deleteMany({})
         await Order.deleteMany({})
+        await Category.deleteMany({})
         await mongoose.disconnect()
         app.close()
     })
@@ -137,6 +140,18 @@ describe('Cart API Success Cases', () => {
 
         expect(res.statusCode).toEqual(201);
         branchTest._id = res.body.branch._id
+    })
+
+    it('Create category', async () => {
+        const res = await request(app)
+            .post('/api/v1/categories')
+            .send({
+                identifier: 'SALS001',
+                name: 'Category 1'
+            })
+            .set('Authorization', `Bearer ${authTokenAdmin}`)
+        expect(res.statusCode).toEqual(201)
+        productTest.category = res.body.category._id
     })
 
     it('Create product', async () => {
@@ -229,6 +244,30 @@ describe('Cart API Success Cases', () => {
     })
 
     it('Update cart quantities', async () => {
+        const res = await request(app)
+            .patch(`/api/v1/carts/${orderId}`)
+            .query({
+                status: 'reserved'
+            })
+            .send({
+                productId: productTest._id,
+                quantity: 2,
+                branchId: branchTest._id
+            })
+            .set('Authorization', `Bearer ${authToken}`)
+
+        expect(res.statusCode).toEqual(200)
+        expect(res.body.cart).toBeDefined()
+    })
+
+    it('Update cart quantities with an unactive product', async () => {
+        const resProduct = await request(app)
+            .patch(`/api/v1/products/${productTest._id}`)
+            .query({
+                status: false
+            })
+            .set('Authorization', `Bearer ${authTokenAdmin}`)
+
         const res = await request(app)
             .patch(`/api/v1/carts/${orderId}`)
             .query({

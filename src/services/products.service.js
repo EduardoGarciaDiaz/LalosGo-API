@@ -2,6 +2,8 @@ const mongoose = require('mongoose')
 const ProductSchema = require('../models/Product')
 const BranchSchema = require('../models/Branch')
 const Product = require('../models/Product')
+const CategoryShcema = require('../models/Category')
+const { map } = require('../app')
 
 const saveNewProduct = async(newProduct) => {
     try {
@@ -10,6 +12,13 @@ const saveNewProduct = async(newProduct) => {
             throw{
                 status: 400,
                 message: "El producto ya se encuentra registrado."
+            }
+        }
+        let foundCategory = await CategoryShcema.findById(newProduct.category)
+        if(!foundCategory){
+            throw{
+                status: 400,
+                message: "La categoria seleccionada para este producto, no existe."
             }
         }
         let productToSave = new ProductSchema(newProduct)
@@ -32,12 +41,19 @@ const updateProduct = async(productToUpdate) => {
         let foundProduct = await ProductSchema.findOne({$or: [{_id: productToUpdate._id}, {barCode: productToUpdate.barCode}]})
         if(!foundProduct){
             throw{
-                status: 400,
+                status: 404,
                 message: "El producto no se encuentra registrado."
             }
         }
+        let foundCategory = await CategoryShcema.findById(productToUpdate.category)
+        if(!foundCategory){
+            throw{
+                status: 404,
+                message: "La categoria seleccionada para este producto, no existe."
+            }
+        }
         
-        let savedProduct = await ProductSchema.findByIdAndUpdate(
+        await ProductSchema.findByIdAndUpdate(
             foundProduct._id, 
             {
                 $set:{
@@ -52,6 +68,8 @@ const updateProduct = async(productToUpdate) => {
                 }
             },
         );
+
+        let savedProduct = await ProductSchema.findById(productToUpdate._id)
         if(savedProduct){
             return savedProduct
         }
@@ -110,6 +128,15 @@ const saveProductInBranch = async (branches, productToAdd) => {
                 message: "El parámetro 'branches' debe ser un arreglo de IDs.",
             };
         }
+        let branchIds = branches.map(branch => branch.id);
+        const foundBranches = await BranchSchema.find({ _id: { $in: branchIds } });
+        if (foundBranches.length !== branchIds.length) {
+            throw {
+                status: 400,
+                message: "Hay una sucursal que no existe, revise las sucursales disponibles.",
+            };
+        }        
+
         const updatedBranches = await Promise.all(
             branches.map(async (branchToUpdate) => {
                 return await BranchSchema.findByIdAndUpdate(
@@ -144,6 +171,15 @@ const updateProductInBranches = async (branches, productToUpdate) => {
             throw {
                 status: 400,
                 message: "El parámetro 'branches' debe ser un arreglo de objetos.",
+            };
+        }
+
+        let branchIdS = branches.map(branch => branch.id);
+        const foundBranches = await BranchSchema.find({ _id: { $in: branchIdS } });
+        if (foundBranches.length !== branchIdS.length) {
+            throw {
+                status: 400,
+                message: "Hay una sucursal que no existe, revise las sucursales disponibles.",
             };
         }
 
@@ -259,6 +295,13 @@ const consultBranchProductsByCategory = async (branchId, categoryId) => {
                 status: 400,
                 message: "branchId y categoryId son requeridos"
             };
+        }
+        let foundCategory = await CategoryShcema.findById(categoryId)
+        if(!foundCategory){
+            throw{
+                status: 404,
+                message: "La categoria seleccionada para este producto, no existe."
+            }
         }
 
         const foundBranch = await BranchSchema.findById(branchId).populate({

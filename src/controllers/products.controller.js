@@ -102,7 +102,7 @@ const createProductImage = async (req, res, next) => {
                     return next({ status: 400, message: "Error al actualizar el producto en la base de datos, puede intentarlo desde el apartado -Edicion Producto-" });
                 }
 
-                return res.status(200).send({
+                return res.status(201).send({
                     message: "Imagen guardada correctamente",
                     product: product
                 });
@@ -204,7 +204,7 @@ const getBranchProducts = async (req, res, next) => {
             productsOfBranch = await ProductService.consultBranchProducts(branchId)
         }
 
-        return res.status(201).send({
+        return res.status(200).send({
             message: `Productos de la sucursal recuperados exitosamente`,
             branch: productsOfBranch
         });
@@ -292,7 +292,7 @@ const editProduct = async (req, res, next) => {
         let productSaved = await ProductService.updateProduct(product);
         if (productSaved) {
             await ProductService.updateProductInBranches(branches, productSaved);
-            return res.status(201).send({
+            return res.status(200).send({
                 message: "Producto actualizado exitosamente.",
                 product: productSaved
             });

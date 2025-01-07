@@ -49,14 +49,12 @@ const editCategory = async(req, res, next) => {
         }
         let resultOperation
         let message
-        if(changeStatus){
+        if(changeStatus != null){
             categoryToUpdate.status = changeStatus
             resultOperation = await CategoriesService.updateCategoryStatus(categoryToUpdate)
-            if(changeStatus==="Active"){
-                message = "La categoría se ha activado correctamente."
-            }else{
-                message = "La categoría se ha desactivado correctamente."
-            }
+            if(changeStatus == "true") {
+                message = "La categoría se ha activado correctamente." 
+            }else{message = "La categoría se ha desactivado correctamente."}     
         }else{
             resultOperation = await CategoriesService.updateCategory(categoryToUpdate)
             message = "La categoría se ha actualizado exitosamente"
