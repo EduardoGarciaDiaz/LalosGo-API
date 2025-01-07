@@ -174,6 +174,15 @@ const deleteAddress = async (req, res, next) => {
         const addressId = req.params.addressId;
 
         const currentAddress = await addressesService.deleteAddress(userId, addressId);
+        if(currentAddress){
+            let location ={
+                latitude: currentAddress.latitude,
+                longitude: currentAddress.longitude,
+                type: currentAddress.type
+            } 
+            let branchId = await BranchService.getNearestBranch(location)
+            await CartService.validateCartProductsWithNewAddress(userId, branchId)
+        }
 
         return res.status(200).send({
             message: "Dirección eliminada correctamente",

@@ -49,7 +49,7 @@ const updateProduct = async(productToUpdate) => {
         if(!foundCategory){
             throw{
                 status: 404,
-                message: "La categoria seleccionada para este producto, no existe."
+                message: "La categoria seleccionada para este producto no existe."
             }
         }
         
@@ -122,12 +122,6 @@ const saveProductImage = async(productId, imageUrl, imageAssetId)=>{
 
 const saveProductInBranch = async (branches, productToAdd) => {
     try {
-        if (!Array.isArray(branches)) {
-            throw {
-                status: 400,
-                message: "El parámetro 'branches' debe ser un arreglo de IDs.",
-            };
-        }
         let branchIds = branches.map(branch => branch.id);
         const foundBranches = await BranchSchema.find({ _id: { $in: branchIds } });
         if (foundBranches.length !== branchIds.length) {
@@ -167,13 +161,6 @@ const saveProductInBranch = async (branches, productToAdd) => {
 
 const updateProductInBranches = async (branches, productToUpdate) => {
     try {
-        if (!Array.isArray(branches)) {
-            throw {
-                status: 400,
-                message: "El parámetro 'branches' debe ser un arreglo de objetos.",
-            };
-        }
-
         let branchIdS = branches.map(branch => branch.id);
         const foundBranches = await BranchSchema.find({ _id: { $in: branchIdS } });
         if (foundBranches.length !== branchIdS.length) {
@@ -190,7 +177,7 @@ const updateProductInBranches = async (branches, productToUpdate) => {
                 if (!branch) {
                     throw {
                         status: 404,
-                        message: `La rama con ID ${branchToUpdate.id} no fue encontrada.`,
+                        message: `La sucursal con ID ${branchToUpdate.id} no fue encontrada.`,
                     };
                 }
 
@@ -300,7 +287,7 @@ const consultBranchProductsByCategory = async (branchId, categoryId) => {
         if(!foundCategory){
             throw{
                 status: 404,
-                message: "La categoria seleccionada para este producto, no existe."
+                message: "La categoria seleccionada para este producto no existe."
             }
         }
 
@@ -333,6 +320,21 @@ const consultBranchProductsByCategory = async (branchId, categoryId) => {
 
 const patchProduct = async(productId, productStatus) => {
     try {
+        let product = await ProductSchema.findById(productId).populate({path:'category'})
+        if(!product){
+            throw{
+                status: 404,
+                message: "El producto no se encuentra registrado."
+            }
+        }
+
+        if(product.category.categoryStatus === false){
+            throw{
+                status: 400,
+                message: `No se puede activar un producto que pertenece a una categoria inactiva. Activa la category ${product.category.name} primero.`
+            }
+        }
+
        const updateProduct = await Product.findByIdAndUpdate(
             productId, 
             { productStatus}, 
@@ -366,7 +368,7 @@ const getProductById = async (productId) => {
         if (!product || product.length === 0) {
             throw {
                 status: 404,
-                message: "No se encontraron productos registrados"
+                message: "No se encontraron productos registrados."
             }
         }
 
