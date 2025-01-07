@@ -7,7 +7,7 @@ router.get('/', authorize('Sales Executive'), incident.getAll);
 
 router.get('/:id', authorize('Customer,Sales Executive'), incident.get);
 
-router.post('/', authorize('Customer'), upload.single("file"), incident.create);
+router.post('/', upload.single("file"), authorize('Customer'),  incident.create);
 
 router.get('/:id/photo', authorize('Customer,Sales Executive'), incident.getPhoto);
 

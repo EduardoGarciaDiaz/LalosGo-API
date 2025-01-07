@@ -1,11 +1,14 @@
 const mongoose = require('mongoose');
 const Incident = require('../models/Incident');
+const User = require('../models/User');
 
 const IncidentsService = {};
 
-IncidentsService.getAllIncidents = async function () {
+IncidentsService.getAllIncidents = async function (employeeId) {
     try {
-        return await Incident.find();
+        branchId = await User.findById(employeeId).branch;
+        const incidents = await Incident.find({ branch: branchId }).populate( {path: 'orderNumber', select: 'orderNumber branch'} );
+        return incidents;
     } catch (error) {
         throw error;
     }
@@ -35,7 +38,7 @@ IncidentsService.getIncident = async function (id) {
 
 IncidentsService.saveIncident = async function (incident) {
     try {
-        const repeatedIncident = await User.findOne({
+        const repeatedIncident = await  Incident.findOne({
             $or: [
                 { orderNumber: incident.orderId }
             ]
@@ -51,7 +54,8 @@ IncidentsService.saveIncident = async function (incident) {
             description: incident.description,
             photo: incident.filename,
             date: incident.date,
-            orderNumber: incident.orderId
+            orderNumber: incident.orderId,
+            mime: incident.mime
         })
 
         return await newIncident.save();
@@ -65,3 +69,5 @@ IncidentsService.saveIncident = async function (incident) {
         throw error;
     }
 }
+
+module.exports = IncidentsService;

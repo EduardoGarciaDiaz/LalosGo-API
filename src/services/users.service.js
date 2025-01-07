@@ -204,7 +204,9 @@ const getUserLogin = async (username) => {
         } else if (userFound.employee) {
             return {
                 id: userFound._id.toString(),
+                username: userFound.username,
                 fullname: userFound.fullname,
+                birthdate: userFound.birthdate,
                 role: userFound.employee.role,
                 password: userFound.password,
                 email: userFound.email,
