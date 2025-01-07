@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const CategorySchema = require('../models/Category')
-
+const ProductSchema = require('../models/Product')
 const ACTIVE_CATEGORY = true;
 const INACTIVE_CATEGORY = false;
 
@@ -70,13 +70,17 @@ const updateCategoryStatus = async (categoryUpdate) => {
             }
         }
 
-        ///validar si es activar o inactivas, para validar si hay pedidos pendiente, y luego activar o desactivar los productos.
-
         let savedCategory = await CategorySchema.findOneAndUpdate({ _id: categoryUpdate._id }, { $set: categoryUpdate }, { new: true })
-        foundCategory = await CategorySchema.findById(savedCategory._id)
+        let updatedCategory = await CategorySchema.findById(savedCategory._id)
 
+        if (categoryUpdate.categoryStatus !== undefined && updatedCategory.categoryStatus !== foundCategory.categoryStatus) {
+            await ProductSchema.updateMany(
+                { category: updatedCategory._id },
+                { $set: {productStatus: updatedCategory.categoryStatus} }
+            );
+        }
 
-        return foundCategory;
+        return updatedCategory;
 
 
     } catch (error) {
