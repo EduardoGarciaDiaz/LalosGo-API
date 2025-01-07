@@ -26,7 +26,6 @@ const {
 router.get('/:userId/payment-methods', authorize('Customer'), validateGetPaymentMethods, userController.getPaymentMethods);
 router.post('/:userId/payment-methods', authorize('Customer'), validateCreatePaymentMethod, userController.postPaymentMethod);
 router.delete('/:userId/payment-methods/:paymentMethodId', authorize('Customer'), validateDeletePaymentMethod, userController.deletePaymentMethod);
-
 router.post('/', validateCreateClientAccount, userController.createClientAccount);
 router.put('/:id', authorize('Customer'), validateUpdateClientAccount, userController.updateClientAccount);
 router.patch('/:userId/password',validateRecoverPassword, userController.recoverPassword);

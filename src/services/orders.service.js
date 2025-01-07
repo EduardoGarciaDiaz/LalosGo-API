@@ -189,7 +189,11 @@ const getAllOrdersByCustomer = async function (customerId) {
 
 const getAllOrdersByDeliveryPerson = async function (deliveryPersonId) {
     try {
-        const orders = await Order.find({ deliveryPerson: deliveryPersonId });
+        const orders = await Order.find({ deliveryPerson: deliveryPersonId }).populate({
+            path: 'orderProducts.product',
+            select: 'image'
+        });
+
         return orders;
     }
     catch (error) {
@@ -209,6 +213,10 @@ const getOrderByCustomer = async function (customerId, orderId) {
                 {
                     path: 'customer',
                     select: 'client.addresses'
+                },
+                {
+                    path: 'deliveryPerson',
+                    select: 'fullname'
                 }
             ]);
 
@@ -226,17 +234,21 @@ const getOrderByCustomer = async function (customerId, orderId) {
 const getOrderByDeliveryPerson = async function (deliveryPersonId, orderId) {
     try {
         const order = await Order.findOne({ deliveryPerson: deliveryPersonId, _id: orderId })
-        .populate([
-            { path: 'orderProducts.product' },
-            {
-                path: 'branch',
-                select: 'address'
-            },
-            {
-                path: 'customer',
-                select: 'client.addresses'
-            }
-        ]);
+            .populate([
+                { path: 'orderProducts.product' },
+                {
+                    path: 'branch',
+                    select: 'address'
+                },
+                {
+                    path: 'customer',
+                    select: 'client.addresses'
+                }, 
+                {
+                    path: 'deliveryPerson',
+                    select: 'fullname'
+                }
+            ]);
 
         if (!order) {
             const error = new Error('Orden no encontrada');
@@ -251,17 +263,21 @@ const getOrderByDeliveryPerson = async function (deliveryPersonId, orderId) {
 const getOrder = async function (orderId) {
     try {
         const order = await Order.findById(orderId)
-        .populate([
-            { path: 'orderProducts.product' },
-            {
-                path: 'branch',
-                select: 'address'
-            },
-            {
-                path: 'customer',
-                select: 'client.addresses'
-            }
-        ]);
+            .populate([
+                { path: 'orderProducts.product' },
+                {
+                    path: 'branch',
+                    select: 'address'
+                },
+                {
+                    path: 'customer',
+                    select: 'client.addresses'
+                }, 
+                {
+                    path: 'deliveryPerson',
+                    select: 'fullname'
+                }
+            ]);
 
         if (!order) {
             const error = new Error('Orden no encontrada');

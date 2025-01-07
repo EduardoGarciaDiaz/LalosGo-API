@@ -84,8 +84,31 @@ const updateStatusSchema = {
     ...statusParamSchema
 };
 
+const assignDeliveryPersonSchema = {
+    id: {
+        in: ['params'],
+        exists: {
+            errorMessage: 'Order ID is required'
+        },
+        isMongoId: {
+            errorMessage: 'Invalid Order ID format'
+        }
+    },
+    deliveryPersonId: {
+        in: ['params'],
+        exists: {
+            errorMessage: 'Delivery Person ID is required'
+        },
+        isMongoId: {
+            errorMessage: 'Invalid Delivery Person ID format'
+        }
+    }
+};
+    
+
 module.exports = {
     validateCartToOrder: checkSchema(cartToOrderSchema),
     validateGetOrder: checkSchema(orderIdParamSchema),
-    validateUpdateStatus: checkSchema(updateStatusSchema)
+    validateUpdateStatus: checkSchema(updateStatusSchema),
+    validateDeliveryPersonAssignment: checkSchema(assignDeliveryPersonSchema)
 };
