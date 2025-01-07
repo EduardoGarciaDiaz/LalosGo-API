@@ -330,7 +330,7 @@ const patchProduct = async(productId, productStatus) => {
 
         if(product.category.categoryStatus === false){
             throw{
-                status: 404,
+                status: 400,
                 message: `No se puede activar un producto que pertenece a una categoria inactiva. Activa la category ${product.category.name} primero.`
             }
         }
