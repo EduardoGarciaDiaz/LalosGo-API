@@ -27,11 +27,10 @@ router.get('/:userId/payment-methods', authorize('Customer'), validateGetPayment
 router.post('/:userId/payment-methods', authorize('Customer'), validateCreatePaymentMethod, userController.postPaymentMethod);
 router.delete('/:userId/payment-methods/:paymentMethodId', authorize('Customer'), validateDeletePaymentMethod, userController.deletePaymentMethod);
 
-// Hice el archivo para validar esto @Lalo, pero sería cuestión de que revises el validator si está bien. (validators/user.schema.validator)
-// En caso de que está bien, debes hacer lo que hice yo, hacer el require y colocarlo en la ruta, como en paymentMethods...
 router.post('/', validateCreateClientAccount, userController.createClientAccount);
 router.put('/:id', authorize('Customer'), validateUpdateClientAccount, userController.updateClientAccount);
 router.patch('/:userId/password',validateRecoverPassword, userController.recoverPassword);
+
 router.get('/:userId/addresses', authorize('Customer'), validateGetAddresses, AddressController.getAddresses);
 router.put('/:userId/addresses', authorize('Customer'), AddressController.updateCurrentAddresStatus)
 router.post('/:userId/addresses', authorize('Customer'), validateCreateAddress,  AddressController.postAddress);

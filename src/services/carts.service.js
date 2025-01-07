@@ -163,8 +163,30 @@ const updateCartQuantities = async (orderId, status, newCartInfo) => {
                 );
 
                 if (productIndex >= 0) {
-                    if (quantity >= 0) {
 
+                    const currentProduct = cartOrder.orderProducts[productIndex].product;
+                    if (!currentProduct.productStatus) {
+                        cartOrder.orderProducts.splice(productIndex, 1);
+                        await cartOrder.save();
+
+                        if (cartOrder.orderProducts.length === 0) {
+                            await cartOrder.deleteOne();
+                            return { cart: "Carrito eliminado", message: "Producto inactivo eliminado" };
+                        }
+
+                        const updatedCart = await Order.findById(cartOrder._id)
+                            .populate({
+                                path: 'orderProducts.product',
+                            });
+
+                        return { 
+                            cart: updatedCart, 
+                            message: "Producto inactivo eliminado del carrito"
+                        };
+                    }
+
+
+                    if (quantity >= 0) {
                         if (quantity === 0) {
                             cartOrder.orderProducts.splice(productIndex, 1);
                             await cartOrder.save();

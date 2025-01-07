@@ -6,6 +6,7 @@ const Order = require('../../src/models/Order')
 const Branch = require('../../src/models/Branch')
 const User = require('../../src/models/User')
 const Product = require('../../src/models/Product')
+const Category = require('../../src/models/Category');
 
 describe('Cart API Failure Cases', () => {
     let authToken = ''
@@ -60,7 +61,7 @@ describe('Cart API Failure Cases', () => {
         limit: 10,
         productStatus: true,
         unitMeasure: 'Piece',
-        category: new mongoose.Types.ObjectId(),
+        category: '',
         branch: ''
     }
 
@@ -70,7 +71,7 @@ describe('Cart API Failure Cases', () => {
         fullname: 'fullname',
         birthdate: new Date(),
         phone: 1234567890,
-        email: 'email',
+        email: 'email@gmail.com',
         password: TEST_PASSWORD,
         status: 'Active',
         client: {
@@ -98,6 +99,7 @@ describe('Cart API Failure Cases', () => {
         await User.deleteMany({})
         await Product.deleteMany({})
         await Order.deleteMany({})
+        await Category.deleteMany({})
         const userData = await createAdminUserData()
         adminUser = await User.create(userData)
     })
@@ -107,6 +109,7 @@ describe('Cart API Failure Cases', () => {
         await User.deleteMany({})
         await Product.deleteMany({})
         await Order.deleteMany({})
+        await Category.deleteMany({})
         await mongoose.disconnect()
         app.close()
     })
@@ -128,7 +131,7 @@ describe('Cart API Failure Cases', () => {
         authTokenAdmin = loginRes.body.token;
     })
 
-    it('Crear una sucursal', async () => {
+    it('Create a branch', async () => {
         const res = await request(app)
             .post('/api/v1/branches')
             .send(branchTest)
@@ -136,6 +139,18 @@ describe('Cart API Failure Cases', () => {
 
         expect(res.statusCode).toEqual(201);
         branchTest._id = res.body.branch._id
+    })
+
+    it('Create category', async () => {
+        const res = await request(app)
+            .post('/api/v1/categories')
+            .send({
+                identifier: 'SALS001',
+                name: 'Category 1'
+            })
+            .set('Authorization', `Bearer ${authTokenAdmin}`)
+        expect(res.statusCode).toEqual(201)
+        productTest.category = res.body.category._id
     })
 
     it('Create product', async () => {
