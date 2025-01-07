@@ -225,7 +225,7 @@ const toggleBranchStatus = async (branchId, newStatus) => {
 
 const getNearestBranch = async (userLocation) => {
     try {
-        let branches = await consultBranches(false)
+        let branches = await BranchSchema.find({branchStatus: true}, { branchProducts: 0 });
         if(!branches){
             throw {
                 status: 400,
