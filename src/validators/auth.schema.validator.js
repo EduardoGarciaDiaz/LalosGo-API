@@ -1,5 +1,4 @@
 const { checkSchema } = require('express-validator');
-const { use } = require('../v1/routes/cart.routes');
 
 const authSchema = {
     username: {

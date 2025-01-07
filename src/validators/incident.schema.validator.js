@@ -69,6 +69,10 @@ const createIncidentSchema = {
                     throw new Error('File size cannot exceed 5MB');
                 }
 
+                if (!req.file.filename) {
+                    throw new Error('Error saving file');
+                }
+
                 return true;
             }
         }
