@@ -185,9 +185,13 @@ const deleteAddress = async (userId, addressId) => {
 
         if (isCurrentAddress && addresses.length > 0) {
             addresses[0].isCurrentAddress = true;
+            let userUpdated = await userFound.save();
+            return  userUpdated.client.addresses[0]
         }
-
+        
         await userFound.save();
+       
+
     } catch (error) {
         if (error.status) {
             throw { status: error.status, message: error.message};
