@@ -13,43 +13,6 @@ const employeeIdSchema = {
     }
 };
 
-const employeeSchema = {
-    role: {
-        exists: {
-            errorMessage: 'Role is required'
-        },
-        isIn: {
-            options: [['Administrator', 'Delivery Person', 'Sales Executive']],
-            errorMessage: 'Invalid Role'
-        }
-    },
-    hiredDate: {
-        exists: {
-            errorMessage: 'Hired date is required'
-        },
-        isISO8601: {
-            errorMessage: 'Invalid hiredDate format. Use ISO8601 format (YYYY-MM-DD)'
-        },
-        custom: {
-            options: (value) => {
-                const hiredDate = new Date(value);
-                const today = new Date();
-                if (hiredDate > today) {
-                    throw new Error('Hired date cannot be in the future');
-                }
-                return true;
-            }
-        }
-    },
-    branch: {
-        exists: {
-            errorMessage: 'Branch is required'
-        },
-        isMongoId: {
-            errorMessage: 'Invalid Branch ID format'
-        }
-    }
-};
 const userSchema = {
     username: {
         exists: {
@@ -114,12 +77,34 @@ const userSchema = {
         }
     },
     employee: {
-        type: employeeSchema,
+        exists: {
+            errorMessage: 'Employee is required'
+        },
+        custom: {
+            options: (value) => {
+                const { role, hiredDate, branch } = value || {};
+                // Validate role
+                if (!['Administrator', 'Delivery Person', 'Sales Executive'].includes(role)) {
+                    throw new Error('Invalid Role');
+                }
+                // Validate hiredDate
+                const hiredDateObj = new Date(hiredDate);
+                const today = new Date();
+                if (isNaN(hiredDateObj.getTime()) || hiredDateObj > today) {
+                    throw new Error('Invalid or future Hired Date');
+                }
+                // Validate branch
+                if (!/^[a-fA-F0-9]{24}$/.test(branch)) {
+                    throw new Error('Invalid Branch ID format');
+                }
+                return true;
+            }
+        }
     }
 };
 
 const passwordSchema = {
-    
+
     password: {
         exists: {
             errorMessage: 'Password is required'
