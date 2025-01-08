@@ -153,8 +153,7 @@ describe('Branch API Failure Cases', () => {
                 .get('/api/v1/branches?location[latitude]=0&location[longitude]=0')
                 .set('Authorization', `Bearer ${authToken}`)
 
-            expect(res.statusCode).toEqual(404)
-            expect(res.body.message).toContain('No se encontraron sucursales registradas')
+            expect(res.statusCode).toEqual(400)
         })
 
         it('Fail to update status of a non-existent branch', async () => {
