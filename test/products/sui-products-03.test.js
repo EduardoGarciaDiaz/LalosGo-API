@@ -275,7 +275,10 @@ describe('Products API Fail methods', () => {
                     productStatus: productTest.productStatus,
                     unitMeasure: productTest.unitMeasure,
                     category: categoryTest._id,
-                    branches :{}                    
+                    branches : [{
+                            id: new mongoose.Types.ObjectId(),
+                        quantity: 0
+                    }]                   
                 })
                 .set('Authorization', `Bearer ${authToken}`)
             expect(res.statusCode).toEqual(400)
