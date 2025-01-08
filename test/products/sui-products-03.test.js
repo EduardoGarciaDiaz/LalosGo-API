@@ -299,7 +299,7 @@ describe('Products API Fail methods', () => {
             expect(res.statusCode).toEqual(400)     
         })
 
-        it('Edit product without necesary fields', async () => {
+        it('Edit product with empty fields', async () => {
             const fakeId = new mongoose.Types.ObjectId()
             const res = await request(app)
                 .put(`/api/v1/products/${fakeId}`)

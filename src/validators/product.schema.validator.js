@@ -129,10 +129,17 @@ const createProductSchema = {
             errorMessage: 'Invalid category ID format'
         }
     },
+    branches: {
+        isArray: {
+            options: { min: 1 }
+        },
+        errorMessage: 'At least one branch is required'
+    },
     'branches.*': {
         exists: {
             errorMessage: 'At least one branch is required'
         }
+
     },
     'branches.*.id': {
         exists: {

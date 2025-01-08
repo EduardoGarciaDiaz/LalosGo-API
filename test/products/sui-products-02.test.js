@@ -342,7 +342,7 @@ describe('Products API Fail methods', () => {
                 })
                 .set('Authorization', `Bearer ${authToken}`)
             expect(res.statusCode).toEqual(404)
-            expect(res.body.message).toEqual("La categoria seleccionada para este producto, no existe.")      
+            expect(res.body.message).toEqual("La categoria seleccionada para este producto no existe.")      
         })
 
         it('Edit product with inexistent branch', async () => {
@@ -395,7 +395,7 @@ describe('Products API Fail methods', () => {
                 .set('Authorization', `Bearer ${authToken}`)
                 console.log(res.body.branch)
             expect(res.statusCode).toEqual(404)
-            expect(res.body.message).toEqual("La categoria seleccionada para este producto, no existe.")  
+            expect(res.body.message).toEqual("La categoria seleccionada para este producto no existe.")  
         })
 
         
